@@ -232,22 +232,20 @@ class ResidentRuntime:
                     model.latent_std = model.latent_std.to(self.device)
                     batch = rt.make_batch(features, payload['anchor'].to(self.device),
                                           tuple(v.to(self.device) for v in payload['c0']))
-                proposals, predictions = [], []
+                predictions = []
                 for seed in seed_list(a.seeds):
                     runner.reset_template_probe_rng(seed)
                     rt.trace_inputs(a, f'seed_{seed}_rng', dict(cpu=torch.get_rng_state(), cuda=torch.cuda.get_rng_state(self.device)))
                     with a.timing.stage('ensemble_seed', gpu=True, seed=seed, samples=a.samples_per_seed, chunk=a.sample_chunk_size):
                         outputs = runner.generate_samples_chunked(model, batch, online, reference_present=False,
                             samples=a.samples_per_seed, chunk_size=a.sample_chunk_size, sampler='sde_eta10')
-                        out = {k:v.detach().cpu() for k,v in outputs.items()}
+                        out = {'final': outputs['final'].detach().cpu()}
                     with a.timing.stage('seed_tensor_write', seed=seed):
                         torch.save(dict(out, seed=seed, atom_identities=identities), a.out / f'seed_{seed}.pt')
-                    proposals.append(out['proposal'])
                     predictions.append(out['final'])
                     del outputs
             with a.timing.stage('ensemble_cif_write'):
-                errors = dict(proposal=rt.write_coordinates(a.out / 'proposals.cif', atoms, identities, torch.cat(proposals)),
-                    ensemble=rt.write_coordinates(a.out / 'ensemble.cif', atoms, identities, torch.cat(predictions)))
+                errors = dict(ensemble=rt.write_coordinates(a.out / 'ensemble.cif', atoms, identities, torch.cat(predictions)))
             total = len(seed_list(a.seeds))*a.samples_per_seed
             report = dict(status='inference_complete', target=target['name'], joint_step=self.joint_step,
                 condition_contract=model.condition_contract,

@@ -450,7 +450,7 @@ def run(args, paths, weights, native_input):
         trace_inputs(args, 'anchor', user_anchor)
         with timer.stage('anchor_cif_write'):
             write_coordinates(args.out / "anchor.cif", atoms, identities, user_anchor[None])
-        proposals, predictions = [], []
+        predictions = []
         for seed in report["seeds"]:
             runner.reset_template_probe_rng(seed)
             trace_inputs(args, f'seed_{seed}_rng', dict(cpu=torch.get_rng_state(), cuda=torch.cuda.get_rng_state(device)))
@@ -459,15 +459,13 @@ def run(args, paths, weights, native_input):
                              chunk=args.sample_chunk_size):
                 outputs = runner.generate_samples_chunked(model, batch, online, reference_present=False,
                     samples=args.samples_per_seed, chunk_size=args.sample_chunk_size, sampler="sde_eta10")
-                out = {k: v.detach().cpu() for k, v in outputs.items()}
+                out = {"final": outputs["final"].detach().cpu()}
             with timer.stage('seed_tensor_write', seed=seed):
                 torch.save(dict(out, seed=seed, atom_identities=identities), args.out / f"seed_{seed}.pt")
-            proposals.append(out["proposal"])
             predictions.append(out["final"])
             del outputs
     with timer.stage('ensemble_cif_write'):
-        errors = {"proposal": write_coordinates(args.out / "proposals.cif", atoms, identities, torch.cat(proposals)),
-                  "ensemble": write_coordinates(args.out / "ensemble.cif", atoms, identities, torch.cat(predictions))}
+        errors = {"ensemble": write_coordinates(args.out / "ensemble.cif", atoms, identities, torch.cat(predictions))}
     report.update(status="inference_complete", total_samples=len(report["seeds"])*args.samples_per_seed,
                   cif_roundtrip_max_error_A=errors, elapsed_seconds=time.monotonic()-start,
                   max_cuda_allocated_gib=torch.cuda.max_memory_allocated(device)/2**30,

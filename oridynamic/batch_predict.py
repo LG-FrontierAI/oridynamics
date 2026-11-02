@@ -12,7 +12,8 @@ import time
 
 from oridynamic.inference_timing import TimingLog
 from oridynamic.local_msa import add_arguments, executable, run_search, validate_a3m, write_json
-from oridynamic.prepare import AMINO_ACIDS, fasta_records, file_info, seed_list
+from oridynamic.prepare import (AMINO_ACIDS, DEFAULT_SEEDS, DEFAULT_SAMPLES_PER_SEED,
+                               DEFAULT_ANCHOR_CANDIDATES, fasta_records, file_info, seed_list)
 from oridynamic.complex_inputs import load_native_targets, proteins
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,10 +35,10 @@ def parser():
     p.add_argument('--out', type=Path, required=True, help='New output directory; existing runs are not overwritten or resumed')
     p.add_argument('--paths', type=Path, default=os.environ.get('ORIDYNAMIC_PATHS') or ROOT / 'configs/portable_paths.example.json')
     p.add_argument('--assets-root', type=Path, default=os.environ.get('ORIDYNAMIC_ASSETS') or ROOT / 'assets', help='Read-only CCD resource root')
-    p.add_argument('--seeds', default='0,1')
-    p.add_argument('--samples-per-seed', type=int, default=8)
+    p.add_argument('--seeds', default=DEFAULT_SEEDS, help='Comma-separated generation seeds (default: 0,1,2,3)')
+    p.add_argument('--samples-per-seed', type=int, default=DEFAULT_SAMPLES_PER_SEED, help='Final conformations per seed (default: 8)')
     p.add_argument('--sample-chunk-size', type=int, default=1)
-    p.add_argument('--anchor-candidates', type=int, default=4)
+    p.add_argument('--anchor-candidates', type=int, default=DEFAULT_ANCHOR_CANDIDATES, help='PTX candidates when no initial structure is supplied (default: 32); select the top-ranked one')
     p.add_argument('--anchor-seed', type=int, default=101)
     p.add_argument('--attention-chunk-size', type=int, default=32)
     p.add_argument('--attention-backend', choices=('torch', 'cuequivariance'), default='torch')

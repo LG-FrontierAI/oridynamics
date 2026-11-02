@@ -9,7 +9,8 @@ from pathlib import Path
 import sys
 import time
 
-from oridynamic.prepare import build_request, file_info
+from oridynamic.prepare import (DEFAULT_SEEDS, DEFAULT_SAMPLES_PER_SEED,
+                               DEFAULT_ANCHOR_CANDIDATES, build_request, file_info)
 from oridynamic.local_msa import add_arguments, attach_local_msa, preflight, validate_modes
 from oridynamic.inference_timing import TimingLog
 
@@ -40,8 +41,8 @@ def main(argv=None):
     p.add_argument("--paths", type=Path, default=os.environ.get("ORIDYNAMIC_PATHS") or here / "configs/portable_paths.example.json", help="Read-only checkpoint path JSON; paths are relative to that JSON file")
     p.add_argument("--runtime-root", type=Path, help="Legacy option; only this release directory is accepted")
     p.add_argument("--assets-root", type=Path, default=os.environ.get("ORIDYNAMIC_ASSETS") or here / "assets", help="Read-only native PTX CCD resource root")
-    p.add_argument("--seeds", default="0", help="Comma-separated generation seeds")
-    p.add_argument("--samples-per-seed", type=int, default=4, help="Final conformation count per seed")
+    p.add_argument("--seeds", default=DEFAULT_SEEDS, help="Comma-separated generation seeds (default: 0,1,2,3)")
+    p.add_argument("--samples-per-seed", type=int, default=DEFAULT_SAMPLES_PER_SEED, help="Final conformation count per seed (default: 8)")
     p.add_argument("--sample-chunk-size", type=int, default=1, help="Generation chunk size; does not change the total sample count")
     p.add_argument("--initial-structure", type=Path, help="Optional complete single-chain PDB/mmCIF; not used as a trunk template")
     p.add_argument("--structure-chain", help="Initial structure author chain ID; if omitted, exactly one protein chain is required")
@@ -49,7 +50,7 @@ def main(argv=None):
     p.add_argument("--msa-server-mode", choices=("protenix", "colabfold"), default="protenix")
     p.add_argument("--single-sequence", action="store_true", help="Offline query-only MSA for smoke testing; not the normal quality protocol")
     add_arguments(p)
-    p.add_argument("--anchor-candidates", type=int, default=4, help="PTX anchor candidates, each with a separate seed")
+    p.add_argument("--anchor-candidates", type=int, default=DEFAULT_ANCHOR_CANDIDATES, help="PTX anchor candidates, each with a separate seed (default: 32)")
     p.add_argument("--anchor-seed", type=int, default=101)
     p.add_argument("--attention-chunk-size", type=int, default=32, help="Attention chunk size for trunk, codec, and refiner")
     p.add_argument("--attention-backend", choices=("torch", "cuequivariance"), default="torch")

@@ -10,6 +10,9 @@ import re
 
 
 AMINO_ACIDS = set("ACDEFGHIKLMNPQRSTVWYX")
+DEFAULT_SEEDS = "0,1,2,3"
+DEFAULT_SAMPLES_PER_SEED = 8
+DEFAULT_ANCHOR_CANDIDATES = 32
 
 
 def file_info(path: Path) -> dict:
@@ -81,9 +84,11 @@ def build_request(args: argparse.Namespace) -> tuple[list[dict], dict]:
         msa = {"mode": "provided", "input": file_info(args.msa_a3m),
                "validation": "query_only_native_featurizer_not_run"}
         protein["unpairedMsaPath"] = msa["input"]["path"]
+    anchor_seed = getattr(args, "anchor_seed", 101)
+    anchor_candidates = getattr(args, "anchor_candidates", DEFAULT_ANCHOR_CANDIDATES)
     anchor = {"source": "ptx_predict", "policy": "native_ranking_score_top1",
-              "candidate_seeds": [101], "samples_per_seed": 4,
-              "candidate_budget_status": "proposed_not_benchmarked",
+              "candidate_seeds": list(range(anchor_seed, anchor_seed + anchor_candidates)),
+              "samples_per_seed": 1,
               "selection_executed": False}
     if args.initial_structure:
         if args.initial_structure.suffix.lower() not in {".cif", ".mmcif", ".pdb"}:
@@ -122,8 +127,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fasta", required=True, type=Path, help="Single protein FASTA")
     parser.add_argument("--name", help="Output target identifier; defaults to the first word of the FASTA header")
-    parser.add_argument("--seeds", default="0,1,2,3", help="Final ensemble generation seeds")
-    parser.add_argument("--samples-per-seed", default=25, type=int, help="Final sample count per seed")
+    parser.add_argument("--seeds", default=DEFAULT_SEEDS, help="Final ensemble generation seeds")
+    parser.add_argument("--samples-per-seed", default=DEFAULT_SAMPLES_PER_SEED, type=int, help="Final sample count per seed")
     parser.add_argument("--sample-chunk-size", default=1, type=int, help="Planned generation batch size; GPU capacity has not been validated")
     parser.add_argument("--initial-structure", type=Path, help="Optional decoder anchor; this command only checks the file")
     parser.add_argument("--msa-a3m", type=Path, help="Existing single-chain unpaired A3M; this command only checks the query")

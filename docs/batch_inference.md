@@ -9,7 +9,7 @@ Complete the [installation and resource setup](../INSTALL.md) first. Run from th
 ```bash
 python -B -u -m oridynamic \
   --fasta sequences.fasta --msa-dir msas \
-  --seeds 0,1 --samples-per-seed 8 --sample-chunk-size 1 \
+  --seeds 0,1,2,3 --samples-per-seed 8 --sample-chunk-size 1 \
   --out runs/batch_v1
 ```
 
@@ -42,7 +42,7 @@ python -B -u -m oridynamic \
   --fasta sequences.fasta --msa-local-db /data/colabfold_db \
   --msa-search-executable /opt/colabfold/bin/colabfold_search \
   --msa-mmseqs /opt/mmseqs/bin/mmseqs --msa-threads 32 \
-  --seeds 0,1 --samples-per-seed 8 --out runs/local_batch_v1
+  --seeds 0,1,2,3 --samples-per-seed 8 --out runs/local_batch_v1
 ```
 
 Local search defaults to CPU. Add `--msa-device gpu` to use a compatible GPU-enabled ColabFold/MMseqs2 installation; GPU visibility follows `CUDA_VISIBLE_DEVICES`.
@@ -58,7 +58,7 @@ See [INSTALL.md](../INSTALL.md) for local installation, CPU/GPU search, and the 
 3. Load the autoencoder, flow module, refine module, and trunk LoRA parameters.
 4. Process targets in turn, computing the online LoRA context and generating samples with the selected anchor.
 
-All target anchors are prepared before the joint-model LoRA parameters are applied. Each target still requires its own forward passes. By default, four anchor candidates are generated and the native ranking score selects one; all final samples use that anchor. `--anchor-candidates 1` changes this budget explicitly.
+All target anchors are prepared before the joint-model LoRA parameters are applied. Each target still requires its own forward passes. By default, 32 anchor candidates are generated and the native ranking score selects one; all final samples use that anchor. `--anchor-candidates` changes this budget explicitly. Supplying an initial structure skips candidate generation.
 
 Models remain in the process, with CPU/GPU offloading between phases and intermediate tensors released between targets. The defaults `--sample-chunk-size 1` and `--attention-chunk-size 32` limit working memory, but do not guarantee support for arbitrary lengths on smaller GPUs. The pair-context tensors in each run-specific `prepared.pt` grow quadratically with token count, so reserve output-disk space accordingly. They are not a shared cache across runs.
 
@@ -74,16 +74,16 @@ All paths below are relative to the directory passed to `--out`.
 | `summary.json`, `timing.json` | Batch completion summary, model-load counts, and timing |
 | `failure.json` | Failure details when an error occurs after run initialization; absent after success |
 | `targets/<name>/anchor.cif` | Selected initial structure |
-| `targets/<name>/proposals.cif`, `targets/<name>/ensemble.cif` | Decoded proposals and final conformations |
+| `targets/<name>/ensemble.cif` | Final conformations from all requested seeds |
 | `targets/<name>/prepared.pt`, `targets/<name>/prepared.json` | Prepared inputs, full-precision anchor, context tensors, identities, and integrity metadata |
-| `targets/<name>/seed_<seed>.pt` | Per-seed proposal/final tensors |
+| `targets/<name>/seed_<seed>.pt` | Final coordinate tensor, seed, and atom identities |
 | `targets/<name>/input.json`, `targets/<name>/resolved_config.json` | Effective native molecular input and model configuration |
 | `targets/<name>/run_metadata.json`, `targets/<name>/completion.json` | Target provenance, sampling settings, and completion status |
 | `targets/<name>/anchor_phase/timing.json`, `targets/<name>/ensemble_phase/timing.json` | Per-target phase timings |
 
 For JSON inputs, protein queries and alignments are stored under `targets/<name>/chains/<first_entity_chain_id>/`: `query.fasta`, copied `provided.a3m`/`paired.a3m`, or query-only `query.a3m`, depending on the selected MSA mode. Local search creates `msa/unpaired.a3m` and `msa/search.json` there. For FASTA/manifest inputs, the same files are directly under `targets/<name>/`. Homomeric copies of one protein entity share its alignment. `input_fingerprints.json` is written within the target directory only with `--trace-inputs`.
 
-Each ensemble/proposal CIF combines samples from all requested seeds. The final count per target is the number of seeds multiplied by `--samples-per-seed`. Chunk size controls how many samples are processed together without changing the total count.
+Each `ensemble.cif` combines samples from all requested seeds. The defaults `--seeds 0,1,2,3 --samples-per-seed 8` produce 32 final conformations per target. Chunk size controls how many samples are processed together without changing the total count. Decoded proposals remain internal to the flow-to-refinement pipeline and are not exported.
 
 Overall wall time includes local MSA search. `inference_wall_seconds_excluding_msa` starts after search and includes initialization, model forward passes, and output writing. Per-target timing excludes time spent waiting for other targets. `ensemble_seed` is nested within `ensemble_target`; do not add both when aggregating elapsed time.
 

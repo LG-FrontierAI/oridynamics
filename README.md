@@ -2,7 +2,10 @@
 
 <img src="docs/images/oridynamic-logo.png" alt="OriDynamic" width="380">
 
-<img src="docs/images/slogan.svg" alt="Understanding biomolecular dynamics is a key step toward biological intelligence." width="820">
+<a id="paper"></a>
+<h1>Biomolecular dynamics through<br>latent ensemble decomposition with OriDynamic</h1>
+
+<img src="docs/images/slogan.svg" alt="Understanding biomolecular dynamics is a key step toward biological intelligence." width="760">
 
 <p>
 <img src="docs/structures/previews/6odd_B.png" alt="6odd_B: protein monomer" width="19%">
@@ -18,12 +21,6 @@
 [🌐 Homepage](https://oridynamics.github.io/) &nbsp; · &nbsp; [📄 Paper (coming soon)](#paper) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/DanielYoung0520/oridynamic_v0) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
 
 </div>
-
-<a id="paper"></a>
-
-### Biomolecular dynamics through latent ensemble decomposition with OriDynamic
-
-*Technical report coming soon.*
 
 OriDynamic generates all-atom conformational ensembles for protein monomers, protein–ligand complexes, and protein–protein assemblies. Provide molecular sequences and composition, together with matching MSAs or a local MSA database. An initial structure is optional; when omitted, the cofolding backbone predicts one before ensemble generation.
 
@@ -88,11 +85,14 @@ After [installation](#installation) and [resource setup](#model-resources), run 
 ```bash
 oridynamic sample \
   --input-json examples/five_cases_with_msa.json \
-  --seeds 0 --samples-per-seed 2 --sample-chunk-size 1 \
+  --anchor-candidates 32 \
+  --seeds 0,1,2,3 --samples-per-seed 8 --sample-chunk-size 1 \
   --out runs/five_cases
 ```
 
-**Result:** two conformations per system, saved to:
+These are the default sampling settings: select the top-ranked initial structure from 32 PTX candidates, then generate eight conformations for each of four seeds.
+
+**Result:** 32 final conformations per system, saved together in:
 
 ```text
 runs/five_cases/targets/<target>/ensemble.cif
@@ -109,13 +109,13 @@ For your own protein sequence, provide its matching A3M alignment:
 oridynamic sample \
   --fasta protein.fasta \
   --msa-a3m protein.a3m \
-  --seeds 0,1 \
+  --seeds 0,1,2,3 \
   --samples-per-seed 8 \
   --sample-chunk-size 1 \
   --out runs/protein
 ```
 
-This generates **16 conformations**: two seeds with eight samples each. Final structures are written to `runs/protein/targets/<target>/ensemble.cif`, where `<target>` is the first word of the FASTA header.
+This generates **32 conformations**: four seeds with eight samples each. Final structures are written to `runs/protein/targets/<target>/ensemble.cif`, where `<target>` is the first word of the FASTA header.
 
 </details>
 
@@ -130,11 +130,11 @@ oridynamic sample \
   --msa-a3m protein.a3m \
   --initial-structure initial.cif \
   --structure-chain A \
-  --seeds 0,1 --samples-per-seed 8 \
+  --seeds 0,1,2,3 --samples-per-seed 8 \
   --out runs/with_structure
 ```
 
-The selected chain must match the input sequence and provide the required heavy atoms. See the [input guide](docs/complex_inputs.md) for structure-matching requirements.
+The supplied structure replaces PTX candidate generation. The selected chain must match the input sequence and provide the required heavy atoms. See the [input guide](docs/complex_inputs.md) for structure-matching requirements.
 
 </details>
 
@@ -161,7 +161,7 @@ oridynamic sample \
   --fasta protein.fasta \
   --msa-local-db /data/colabfold_db \
   --msa-threads 16 \
-  --seeds 0,1 --samples-per-seed 8 \
+  --seeds 0,1,2,3 --samples-per-seed 8 \
   --out runs/from_sequence
 ```
 
@@ -183,7 +183,7 @@ Each FASTA entry is treated as a separate target. Place the corresponding alignm
 ```bash
 oridynamic sample \
   --fasta sequences.fasta --msa-dir msas \
-  --seeds 0,1 --samples-per-seed 8 \
+  --seeds 0,1,2,3 --samples-per-seed 8 \
   --out runs/batch
 ```
 

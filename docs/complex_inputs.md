@@ -47,6 +47,6 @@ The structure must contain all input chains and the required heavy atoms. Residu
 
 An `anchor.cif` produced by this entry point can be reused directly. Homomeric chains are not automatically permuted, and ligands are not aligned or centered independently. After mapping, one canonical frame is established for the complete complex.
 
-Without a supplied structure, Protenix predicts the entire complex from its protein and ligand inputs. The native `ranking_score` selects the anchor. The resulting `anchor.cif`, `proposals.cif`, and `ensemble.cif` include every chain and ligand, with identity and coordinate checks on readback.
+Without a supplied structure, Protenix predicts the entire complex from its protein and ligand inputs. The native `ranking_score` selects the anchor. The resulting `anchor.cif` and `ensemble.cif` include every chain and ligand, with identity and coordinate checks on readback.
 
 All supported input types use the same `ae.ckpt` and `oridynamic.ckpt` files. See [model and sampling settings](model_card.md).

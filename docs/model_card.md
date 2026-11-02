@@ -14,7 +14,7 @@ Monomers, protein–ligand complexes, and protein–protein assemblies use the s
 
 ## Sampling configuration
 
-When an initial structure is supplied, it becomes the decoder anchor. Otherwise, the backbone predicts four candidates using 200 SDE steps and ten trunk cycles, and selects the highest native ranking score. The number of candidates is controlled by `--anchor-candidates`.
+When an initial structure is supplied, it becomes the decoder anchor. Otherwise, the backbone predicts 32 candidates by default, using 200 SDE steps and ten trunk cycles for each, and selects the highest native ranking score. The number of candidates is controlled by `--anchor-candidates`.
 
 The released model uses the same LoRA-adapted trunk context for the frozen autoencoder, flow module, and refine module. The selected anchor defines the canonical coordinate frame. Explicit reference conditioning in the latent flow module is disabled.
 
@@ -26,4 +26,4 @@ The released model uses the same LoRA-adapted trunk context for the frozen autoe
 | Coordinate diffusion precision | FP32 |
 | TF32 | Disabled |
 
-Final conformations per target equal the number of seeds multiplied by `--samples-per-seed`. See the [batch guide](batch_inference.md) for sampling controls and output files.
+Final conformations per target equal the number of seeds multiplied by `--samples-per-seed`: four seeds (`0,1,2,3`) with eight samples each produce 32 conformations by default. See the [batch guide](batch_inference.md) for sampling controls and output files.

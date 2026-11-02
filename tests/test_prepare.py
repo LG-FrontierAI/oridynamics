@@ -24,9 +24,14 @@ class PreparationTests(unittest.TestCase):
         self.assertEqual(native[0]["sequences"][0]["proteinChain"],
                          {"sequence": "ACDEFG", "count": 1})
         self.assertEqual(request["ensemble"]["total_samples"], 250)
+        self.assertEqual(request["anchor"]["candidate_seeds"], list(range(101, 133)))
+        self.assertEqual(request["anchor"]["samples_per_seed"], 1)
         self.assertFalse(request["ready_for_inference"])
         self.args.sample_chunk_size = 16
         self.assertEqual(build_request(self.args)[1]["ensemble"]["total_samples"], 250)
+        self.args.anchor_seed = 7
+        self.args.anchor_candidates = 2
+        self.assertEqual(build_request(self.args)[1]["anchor"]["candidate_seeds"], [7, 8])
 
     def test_invalid_budget_and_multichain(self):
         for bad in ("", "1,1", "-1", "4294967296", "x"):

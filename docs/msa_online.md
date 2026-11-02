@@ -16,7 +16,7 @@ Run inference locally:
 
 ```bash
 python -B -u -m oridynamic --manifest request.json \
-  --seeds 0,1 --samples-per-seed 8 --out runs/from_online_msas_v1
+  --seeds 0,1,2,3 --samples-per-seed 8 --out runs/from_online_msas_v1
 ```
 
 Measure online MSA preparation separately from local inference; service time includes networking and queueing.

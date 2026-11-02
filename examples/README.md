@@ -10,13 +10,14 @@ Follow [INSTALL.md](../INSTALL.md) to install the inference environment and conf
 
 ```bash
 oridynamic sample --input-json examples/five_cases_with_msa.json \
-  --seeds 0 --samples-per-seed 2 --sample-chunk-size 1 \
+  --anchor-candidates 32 \
+  --seeds 0,1,2,3 --samples-per-seed 8 --sample-chunk-size 1 \
   --out runs/five_cases
 ```
 
-This generates two final conformations per system, or ten in total. Each final ensemble is saved as `runs/five_cases/targets/<name>/ensemble.cif`. Use a new output directory for each run. Add `--plan` to validate inputs and resource paths without model inference or output creation.
+This generates 32 final conformations per system, or 160 in total. For each system, PTX generates 32 candidates and selects the highest-ranked initial structure; four ensemble seeds then generate eight samples each. Each final ensemble is saved as `runs/five_cases/targets/<name>/ensemble.cif`. Use a new output directory for each run. Add `--plan` to validate inputs and resource paths without model inference or output creation.
 
-For a larger ensemble, increase `--samples-per-seed`, for example to `40`.
+For a larger ensemble, increase `--samples-per-seed`.
 
 ## Included alignments
 
@@ -42,14 +43,15 @@ Keep the supplied sequences unchanged so that they match the bundled MSAs.
 ```bash
 oridynamic sample --input-json examples/five_cases.json \
   --msa-local-db /data/colabfold_db --msa-threads 16 \
-  --seeds 0 --samples-per-seed 2 --sample-chunk-size 1 \
+  --seeds 0,1,2,3 --samples-per-seed 8 --sample-chunk-size 1 \
   --out runs/five_cases_local_search
 ```
 
-For an explicitly query-only installation test:
+For a small query-only installation test, use one PTX candidate and two final samples per system:
 
 ```bash
 oridynamic sample --input-json examples/five_cases.json --single-sequence \
+  --anchor-candidates 1 \
   --seeds 0 --samples-per-seed 2 --sample-chunk-size 1 \
   --out runs/five_cases_query_only
 ```

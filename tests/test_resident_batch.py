@@ -197,9 +197,18 @@ class ResidentBatchTests(unittest.TestCase):
     def test_plan_has_no_writes_search_or_load(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);a=self.args(root)
-            with mock.patch.object(cli,'run_search') as search, mock.patch.object(cli,'execute_batch') as execute, redirect_stdout(io.StringIO()):
-                cli.main(['--fasta',str(a.fasta),'--out',str(a.out),'--single-sequence','--plan',*self.fake_resources(root)])
-            search.assert_not_called();execute.assert_not_called();self.assertFalse(a.out.exists())
+            resources=self.fake_resources(root)
+            for extra, seeds, count, candidates in [([], [0,1,2,3], 8, 32),
+                    (['--seeds','7,9','--samples-per-seed','3','--anchor-candidates','2'], [7,9], 3, 2)]:
+                with self.subTest(extra=extra):
+                    stream=io.StringIO()
+                    with mock.patch.object(cli,'run_search') as search, mock.patch.object(cli,'execute_batch') as execute, redirect_stdout(stream):
+                        cli.main(['--fasta',str(a.fasta),'--out',str(a.out),'--single-sequence','--plan',*resources,*extra])
+                    plan,_=json.JSONDecoder().raw_decode(stream.getvalue())
+                    self.assertEqual(plan['seeds'],seeds)
+                    self.assertEqual(plan['samples_per_seed'],count)
+                    self.assertEqual(plan['anchor_candidates'],candidates)
+                    search.assert_not_called();execute.assert_not_called();self.assertFalse(a.out.exists())
 
     def test_search_before_engine_and_query_not_replaced(self):
         # 正式main的输入/搜索/模型路由模拟；不使用网络、不加载真实大模型。
@@ -246,7 +255,7 @@ class ResidentBatchTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp, redirect_stdout(io.StringIO()):
             root=Path(tmp);a=self.args(root,single_sequence=True)
             a.out.mkdir();a.runtime_root=Path(__file__).resolve().parents[1]
-            a.check=True;a.dtype='fp32';a.seeds='4';a.samples_per_seed=2
+            a.check=True;a.dtype='fp32'
             a.timing=TimingLog(a.out);a.timing.configure_cuda(lambda:None)
             engine=ResidentRuntime.__new__(ResidentRuntime)
             engine.a=a;engine.timer=a.timing;engine.model=model;engine.device=torch.device('cpu')
@@ -264,12 +273,33 @@ class ResidentBatchTests(unittest.TestCase):
                      mock.patch('torch.cuda.get_rng_state',return_value=torch.get_rng_state()), \
                      mock.patch('torch.cuda.max_memory_allocated',return_value=0):
                     engine.sample(target)
-            first=torch.load(a.out/'targets/one/seed_4.pt',weights_only=True)
-            second=torch.load(a.out/'targets/two/seed_4.pt',weights_only=True)
-            torch.testing.assert_close(first['final'],second['final'],atol=0,rtol=0)
+            from biotite.structure.io.pdbx import CIFFile, get_structure
+            for name in ('one','two'):
+                folder=a.out/'targets'/name
+                self.assertEqual(sorted(p.name for p in folder.glob('seed_*.pt')),
+                                 [f'seed_{seed}.pt' for seed in range(4)])
+                finals=[]
+                for seed in range(4):
+                    saved=torch.load(folder/f'seed_{seed}.pt',weights_only=True)
+                    self.assertEqual(set(saved),{'final','seed','atom_identities'})
+                    self.assertEqual(saved['seed'],seed)
+                    self.assertEqual(saved['atom_identities'],ids)
+                    self.assertEqual(saved['final'].shape,(8,6,3))
+                    reference=torch.load(a.out/'targets/one'/f'seed_{seed}.pt',weights_only=True)
+                    torch.testing.assert_close(saved['final'],reference['final'],atol=0,rtol=0)
+                    finals.append(saved['final'])
+                ensemble=get_structure(CIFFile.read(folder/'ensemble.cif'))
+                self.assertEqual(ensemble.stack_depth(),32)
+                np.testing.assert_allclose(ensemble.coord,torch.cat(finals).numpy(),atol=5.1e-4,rtol=0)
+                self.assertFalse((folder/'proposals.cif').exists())
+                report=json.loads((folder/'run_metadata.json').read_text())
+                self.assertEqual(report['total_samples'],32)
+                self.assertEqual(report['seeds'],[0,1,2,3])
+                self.assertEqual(set(report['cif_roundtrip_max_error_A']),{'ensemble'})
             for k,v in model.state_dict().items():torch.testing.assert_close(v,state[k],atol=0,rtol=0)
             self.assertEqual(len(engine.results),2)
-            self.assertEqual(len([e for e in a.timing.data['stages'] if e['stage']=='ensemble_seed']),2)
+            self.assertTrue(all(r['total_samples']==32 for r in engine.results))
+            self.assertEqual(len([e for e in a.timing.data['stages'] if e['stage']=='ensemble_seed']),8)
 
 
 if __name__=='__main__':unittest.main()
