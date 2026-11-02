@@ -166,4 +166,4 @@ The [batch guide](docs/batch_inference.md#outputs-and-timing) defines search and
 
 ## License
 
-OriDynamic is released under [Apache-2.0](LICENSE). See [NOTICE](NOTICE), [LICENSE-PTX](LICENSE-PTX), and [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES) for attribution and third-party terms.
+OriDynamic is released under [Apache-2.0](LICENSE). See [NOTICE](NOTICE), [Protenix license](licenses/Protenix.txt), and [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES) for attribution and third-party terms.

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/oridynamic-logo.png" alt="OriDynamic" width="560">
+<img src="docs/images/oridynamic-logo.png" alt="OriDynamic" width="380">
 
 <img src="docs/images/slogan.svg" alt="Understanding biomolecular dynamics is a key step toward biological intelligence." width="820">
 
@@ -13,11 +13,17 @@
 </p>
 
 [![Beta release: 0.1.0b0](docs/images/release.svg)](pyproject.toml)
-[![Apache-2.0 license](docs/images/license.svg)](LICENSE)
 
-[🌐 Website](https://oridynamics.github.io/) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/DanielYoung0520/oridynamic_v0) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
+<!-- Replace the Paper link's #paper target with the technical report URL when available. -->
+[🌐 Homepage](https://oridynamics.github.io/) &nbsp; · &nbsp; [📄 Paper (coming soon)](#paper) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/DanielYoung0520/oridynamic_v0) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
 
 </div>
+
+<a id="paper"></a>
+
+### Biomolecular dynamics through latent ensemble decomposition with OriDynamic
+
+*Technical report coming soon.*
 
 OriDynamic generates all-atom conformational ensembles for protein monomers, protein–ligand complexes, and protein–protein assemblies. Provide molecular sequences and composition, together with matching MSAs or a local MSA database. An initial structure is optional; when omitted, the cofolding backbone predicts one before ensemble generation.
 
@@ -77,7 +83,7 @@ For resources stored elsewhere, edit a copy of the [path configuration](configs/
 
 ## 🚀 Quick start
 
-After [installation](#installation) and [resource setup](#model-resources), run the five bundled examples: three monomers, one protein–ligand complex, and one protein–protein assembly. Their MSAs are included, so this example needs no MSA search tools or databases.
+After [installation](#installation) and [resource setup](#model-resources), run the five systems shown above: **6odd_B**, **7e2s_A**, **6l3r_E**, **2K0G**, and **A00C2**. Their MSAs are included, so this example needs no MSA search tools or databases.
 
 ```bash
 oridynamic sample \
