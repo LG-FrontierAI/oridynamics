@@ -52,11 +52,13 @@ The default Torch backend does not require compiling fused LayerNorm. The option
 
 ## 2. Model weights and CCD
 
-Download the OriDynamic autoencoder and joint weights from [Hugging Face](https://huggingface.co/DanielYoung0520/oridynamic_v0), then obtain **Protenix base v1.0.0** from the official upstream URL.
+Download the OriDynamic autoencoder and joint weights from [Hugging Face](https://huggingface.co/DanielYoung0520/oridynamic_v0), then obtain **Protenix base v1.0.0** from the official upstream URL. Install the download tools with the project's dependency constraints; `socksio` enables SOCKS proxy support.
 
 ```bash
 mkdir -p weights assets/common
-python -m pip install -U huggingface_hub
+python -m pip install -c requirements-inference.txt \
+  "huggingface_hub==2.4.0" "socksio==1.0.0"
+python -m pip check
 hf download DanielYoung0520/oridynamic_v0 \
   ae.ckpt oridynamic.ckpt \
   --local-dir weights
