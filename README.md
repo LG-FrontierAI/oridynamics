@@ -66,6 +66,8 @@ Download the following resources before running inference:
 
 Follow [Model weights and CCD](INSTALL.md#2-model-weights-and-ccd) to download these resources into `weights/` and `assets/common/` in the code checkout.
 
+**Both CCD files are required for every system type, including the five examples.** See the [CCD download instructions](INSTALL.md#ccd) for their roles and download commands.
+
 After downloading the resources, configure their locations from the code repository root:
 
 ```bash

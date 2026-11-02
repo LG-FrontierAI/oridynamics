@@ -52,26 +52,58 @@ The default Torch backend does not require compiling fused LayerNorm. The option
 
 ## 2. Model weights and CCD
 
-Download the OriDynamic autoencoder and joint weights from [Hugging Face](https://huggingface.co/DanielYoung0520/oridynamic_v0), then obtain **Protenix base v1.0.0** from the official upstream URL. Install the download tools with the project's dependency constraints; `socksio` enables SOCKS proxy support.
+Download the OriDynamic autoencoder and joint weights from [Hugging Face](https://huggingface.co/DanielYoung0520/oridynamic_v0), and **Protenix base v1.0.0** plus both CCD files from the official [Protenix](https://github.com/bytedance/Protenix) distribution. The commands below download all five required files.
+
+<a id="ccd"></a>
+
+### Chemical component data (required)
+
+Both CCD (Chemical Component Dictionary) files are required for protein monomers, protein–ligand complexes, and protein–protein assemblies, including the bundled examples. They supply the chemical information used to prepare molecular inputs:
+
+| File | Purpose |
+| :--- | :--- |
+| `components.cif` | Atom and bond definitions for residues and ligands. |
+| `components.cif.rdkit_mol.pkl` | Precomputed RDKit molecules used to obtain chemical reference features. |
+
+Save both CCD files in `assets/common/`. Installing the Python package or downloading the OriDynamic weights does not install these files; the inference runtime does not fetch them automatically.
+
+### Download all resources
+
+Run this complete block from the code repository root. The download tools use the project's dependency constraints; `socksio` enables SOCKS proxy support.
 
 ```bash
 mkdir -p weights assets/common
 python -m pip install -c requirements-inference.txt \
   "huggingface_hub==2.4.0" "socksio==1.0.0"
 python -m pip check
+
+# OriDynamic weights
 hf download DanielYoung0520/oridynamic_v0 \
   ae.ckpt oridynamic.ckpt \
   --local-dir weights
 
+# Protenix base v1.0.0
 curl -fL --retry 3 \
   https://protenix.tos-cn-beijing.volces.com/checkpoint/protenix_base_default_v1.0.0.pt \
   -o weights/protenix_base_default_v1.0.0.pt
 printf '%s  %s\n' \
   '2b7d5a8b30494514fc47fd2271a16260528cdba170ba09cc112fdecd8f85ec04' \
   weights/protenix_base_default_v1.0.0.pt | sha256sum -c -
+
+# Required CCD resources
+curl -fL --retry 3 \
+  https://protenix.tos-cn-beijing.volces.com/common/components.cif \
+  -o assets/common/components.cif
+curl -fL --retry 3 \
+  https://protenix.tos-cn-beijing.volces.com/common/components.cif.rdkit_mol.pkl \
+  -o assets/common/components.cif.rdkit_mol.pkl
 ```
 
-After also downloading the CCD files below, the local resource layout is:
+Use the official Protenix v1.0.0 file with the SHA-256 shown above and the matching OriDynamic checkpoints. The loader checks checkpoint compatibility before sampling. The RDKit companion is a pickle resource; use the official source above.
+
+### Resource paths
+
+After downloading the weights and both CCD files, the local resource layout is:
 
 ```text
 weights/
@@ -83,20 +115,7 @@ assets/common/
   components.cif.rdkit_mol.pkl
 ```
 
-Use the official Protenix v1.0.0 file with the SHA-256 shown above and the matching OriDynamic checkpoints. The loader checks checkpoint compatibility before sampling.
-
-Download both CCD files from the official URLs used by this release. The inference runtime does not fetch them automatically:
-
-```bash
-curl -fL --retry 3 \
-  https://protenix.tos-cn-beijing.volces.com/common/components.cif \
-  -o assets/common/components.cif
-curl -fL --retry 3 \
-  https://protenix.tos-cn-beijing.volces.com/common/components.cif.rdkit_mol.pkl \
-  -o assets/common/components.cif.rdkit_mol.pkl
-```
-
-The RDKit companion is a pickle resource; use the official source above. Once the files are present, set the paths in the same shell:
+Set the paths in the same shell:
 
 ```bash
 export ORIDYNAMIC_PATHS="$PWD/configs/portable_paths.example.json"
