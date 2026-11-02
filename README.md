@@ -14,12 +14,12 @@
 
 [![Beta release: 0.1.0b0](docs/images/release.svg)](pyproject.toml)
 
-<!-- Replace the Paper link's #paper target with the technical report URL when available. -->
-[🌐 Homepage](https://oridynamics.github.io/) &nbsp; · &nbsp; [📄 Paper (coming soon)](#paper) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/DanielYoung0520/oridynamic_v0) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
+<!-- Replace #technical-report with the technical report URL when available. -->
+[🌐 Homepage](https://oridynamics.github.io/) &nbsp; · &nbsp; [📄 Technical report (coming soon)](#technical-report) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/DanielYoung0520/oridynamic_v0) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
 
 </div>
 
-<a id="paper"></a>
+<a id="technical-report"></a>
 
 OriDynamic generates all-atom conformational ensembles for protein monomers, protein–ligand complexes, and protein–protein assemblies. Provide molecular sequences and composition, together with matching MSAs or a local MSA database. An initial structure is optional; when omitted, the cofolding backbone predicts one before ensemble generation.
 
