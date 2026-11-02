@@ -2,16 +2,14 @@
 
 <img src="docs/images/oridynamic-logo.png" alt="OriDynamic" width="560">
 
-**Understanding biomolecular dynamics is a key step toward biological intelligence.**
+<img src="docs/images/slogan.svg" alt="Understanding biomolecular dynamics is a key step toward biological intelligence." width="820">
 
 <p>
-<img src="docs/structures/previews/6odd_B.gif" alt="6odd_B: protein monomer, 74 residues" width="31%">
-<img src="docs/structures/previews/7e2s_A.gif" alt="7e2s_A: protein monomer, 233 residues" width="31%">
-<img src="docs/structures/previews/6l3r_E.gif" alt="6l3r_E: protein monomer, 669 residues" width="31%">
-</p>
-<p>
-<img src="docs/structures/previews/2K0G.gif" alt="2K0G: protein–ligand complex" width="31%">
-<img src="docs/structures/previews/A00C2.gif" alt="A00C2: protein–protein assembly" width="31%">
+<img src="docs/structures/previews/6odd_B.png" alt="6odd_B: protein monomer" width="19%">
+<img src="docs/structures/previews/7e2s_A.png" alt="7e2s_A: protein monomer" width="19%">
+<img src="docs/structures/previews/6l3r_E.png" alt="6l3r_E: protein monomer" width="19%">
+<img src="docs/structures/previews/2K0G.png" alt="2K0G: protein–ligand complex" width="19%">
+<img src="docs/structures/previews/A00C2.png" alt="A00C2: protein–protein assembly" width="19%">
 </p>
 
 [![Beta release: 0.1.0b0](docs/images/release.svg)](pyproject.toml)

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="106" viewBox="0 0 960 106" role="img" aria-labelledby="title">
+  <title id="title">Understanding biomolecular dynamics is a key step toward biological intelligence.</title>
+  <style>
+    text { font-family: Arial, Helvetica, sans-serif; font-weight: 700; text-anchor: middle; }
+    .blue { fill: #2864AD; }
+    .purple { fill: #8063AD; }
+    @media (prefers-color-scheme: dark) {
+      .blue { fill: #75B8EF; }
+      .purple { fill: #B69AE0; }
+    }
+  </style>
+  <text x="480" y="38" class="blue" font-size="34">Understanding biomolecular dynamics</text>
+  <text x="480" y="83" class="purple" font-size="34">is a key step toward biological intelligence.</text>
+</svg>
