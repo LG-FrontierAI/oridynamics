@@ -2,9 +2,6 @@
 
 <img src="docs/images/oridynamic-logo.png" alt="OriDynamic" width="380">
 
-<a id="paper"></a>
-<h1>Biomolecular dynamics through<br>latent ensemble decomposition with OriDynamic</h1>
-
 <img src="docs/images/slogan.svg" alt="Understanding biomolecular dynamics is a key step toward biological intelligence." width="760">
 
 <p>
@@ -21,6 +18,8 @@
 [🌐 Homepage](https://oridynamics.github.io/) &nbsp; · &nbsp; [📄 Paper (coming soon)](#paper) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/DanielYoung0520/oridynamic_v0) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
 
 </div>
+
+<a id="paper"></a>
 
 OriDynamic generates all-atom conformational ensembles for protein monomers, protein–ligand complexes, and protein–protein assemblies. Provide molecular sequences and composition, together with matching MSAs or a local MSA database. An initial structure is optional; when omitted, the cofolding backbone predicts one before ensemble generation.
 
