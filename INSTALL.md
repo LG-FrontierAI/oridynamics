@@ -1,4 +1,4 @@
-# Installation and Docker
+# Installation
 
 OriDynamic supports editable installation with `python -m pip install -e .` and installation from a built wheel. The public commands are `oridynamic sample`, `oridynamic msa`, and `oridynamic doctor`. See the [README](README.md) for a quick start.
 
@@ -10,7 +10,7 @@ Inference requires this repository, its matching inference checkpoints, CCD reso
 
 From this repository, use `python -m oridynamic sample`. After installation, `oridynamic sample` is available from other working directories. See the [batch guide](docs/batch_inference.md) for existing MSAs, local search, and optional initial structures, or the [online MSA guide](docs/msa_online.md) to prepare alignments separately.
 
-The supplied Docker recipe uses the same CLI. A batch with existing MSAs can be run as follows after building the image:
+For optional Docker use, the repository includes a [Dockerfile](docker/Dockerfile.inference) that you build locally. The commands below use that locally built image and the same CLI. A batch with existing MSAs can be run as follows:
 
 ```bash
 mkdir batch_output
@@ -42,7 +42,7 @@ oridynamic --help
 
 Keep this environment activated and run subsequent commands from the code repository root. If the code is already cloned, start with environment setup inside that checkout. The package reads its Python dependencies from `requirements-inference.txt`; the CUDA-specific Torch wheel is installed first.
 
-Alternatively, build the supplied inference image from this repository:
+To optionally build an inference image locally from the supplied Dockerfile:
 
 ```bash
 docker build -f docker/Dockerfile.inference -t oridynamic-inference:local .

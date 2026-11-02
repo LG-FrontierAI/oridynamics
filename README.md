@@ -49,7 +49,7 @@ python -m pip install -e .
 oridynamic --help
 ```
 
-Run the examples below from the cloned repository. Alternative environment setup and Docker instructions are in the [installation guide](INSTALL.md).
+Run the examples below from the cloned repository. For detailed environment setup and model-resource configuration, see the [installation guide](INSTALL.md).
 
 <a id="model-resources"></a>
 
@@ -196,7 +196,7 @@ Optional initial structures can be supplied with `--structure-dir anchors`, usin
 
 | I want to… | Guide |
 | :--- | :--- |
-| Set up the environment, weights, or Docker | [Installation](INSTALL.md) |
+| Set up the environment and model resources | [Installation](INSTALL.md) |
 | Run batches and understand the outputs | [Batch inference](docs/batch_inference.md) |
 | Prepare protein–ligand or protein–protein inputs | [Complex inputs](docs/complex_inputs.md) |
 | Generate MSAs with an online service | [Online MSA](docs/msa_online.md) |
