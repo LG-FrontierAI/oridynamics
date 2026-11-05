@@ -150,6 +150,13 @@ else:
         failure = json.loads((self.args.out / "failure.json").read_text())
         self.assertIn("code=7", failure["error"])
         self.assertFalse((self.args.out / "completion.json").exists())
+        previous = (self.args.out / "failure.json").read_bytes()
+        repeated = subprocess.run(cmd, capture_output=True, text=True)
+        self.assertNotEqual(repeated.returncode, 0)
+        new_output, = self.root.glob('run_*')
+        self.assertIn('code=7', json.loads((new_output / 'failure.json').read_text())['error'])
+        self.assertEqual(json.loads((new_output / 'request.json').read_text())['output'], str(new_output))
+        self.assertEqual((self.args.out / "failure.json").read_bytes(), previous)
 
     def test_docker_wrapper_without_docker_or_gpu(self):
         fake_docker = self.root / "docker"

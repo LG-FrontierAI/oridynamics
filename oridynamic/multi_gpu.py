@@ -3,22 +3,20 @@ from __future__ import annotations
 
 import argparse
 from contextlib import ExitStack, redirect_stdout
-from datetime import datetime
 import io
 import json
 import os
 from pathlib import Path
 import re
 import signal
-import socket
 import subprocess
 import sys
 import time
-import uuid
 
 from oridynamic import batch_predict
 from oridynamic.complex_inputs import load_native_targets, native_sample
 from oridynamic.prepare import anchor_sampling_spec
+from oridynamic.output_paths import output_directory, timestamped_output
 
 ROOT = Path(__file__).resolve().parents[1]
 OPTIONS = (
@@ -34,7 +32,7 @@ def parser():
     p.add_argument('--gpus', required=True,
                    help='Comma-separated GPU indices; relative to CUDA_VISIBLE_DEVICES when set')
     p.add_argument('--out', type=Path,
-                   help='New output directory; default: runs/multigpu_<host>_<timestamp>_<unique ID>')
+                   help='Output directory; auto-suffix if it exists; default: runs/multigpu_<host>_<timestamp>_<unique ID>')
     defaults = batch_predict.parser()
     for name in OPTIONS:
         default = defaults.get_default(name)
@@ -73,9 +71,7 @@ def resolve_gpus(value, environ):
 
 
 def automatic_output():
-    host = re.sub(r'[^A-Za-z0-9_.-]', '_', socket.gethostname())
-    stamp = datetime.now().astimezone().strftime('%Y%m%d_%H%M%S_%f')
-    return Path('runs') / f'multigpu_{host}_{stamp}_{uuid.uuid4().hex[:8]}'
+    return timestamped_output(Path('runs') / 'multigpu')
 
 
 def split_targets(targets, gpus):
@@ -122,10 +118,11 @@ def stop_workers(processes):
 
 
 def run_workers(root, groups, options):
-    root.mkdir(parents=True, exist_ok=False)
+    requested_output = root.absolute()
+    root = output_directory(requested_output, create=True)
     (root / 'inputs').mkdir()
     (root / 'logs').mkdir()
-    report = dict(status='running', output=str(root), workers=[])
+    report = dict(status='running', requested_output=str(requested_output), output=str(root), workers=[])
     processes = []
     report_path = root / 'multi_gpu.json'
     print(f'[Multi-GPU] Output: {root}', flush=True)
@@ -193,9 +190,8 @@ def main(argv=None):
     args = p.parse_args(argv)
     try:
         gpus = resolve_gpus(args.gpus, os.environ)
-        root = (args.out if args.out is not None else automatic_output()).absolute()
-        if root.exists() or root.is_symlink():
-            raise ValueError(f'Output already exists; provide a new directory: {root}')
+        requested_output = (args.out if args.out is not None else automatic_output()).absolute()
+        root = output_directory(requested_output)
         args.input_json = args.input_json.resolve(strict=True)
         args.paths = args.paths.resolve(strict=True)
         args.assets_root = args.assets_root.resolve(strict=True)
@@ -209,7 +205,7 @@ def main(argv=None):
         args.msa_local_db, args.single_sequence, args.limit = None, False, None
         groups = split_targets(load_native_targets(args.input_json, args), gpus)
         if args.plan:
-            print(json.dumps(dict(output=str(root), workers=[
+            print(json.dumps(dict(requested_output=str(requested_output), output=str(root), workers=[
                 dict(gpu=g['gpu'], cuda_device=g['cuda_device'],
                      targets=[t['name'] for t in g['targets']]) for g in groups],
                 seeds=args.seeds, samples_per_seed=args.samples_per_seed,
@@ -217,7 +213,7 @@ def main(argv=None):
                 anchor_sampling=anchor_sampling_spec(args.anchor_seed, args.anchor_candidates, args.anchor_samples_per_seed),
                 status='preflight_only', gpu_availability='not_checked'), indent=2))
             return 0
-        return run_workers(root, groups, options)
+        return run_workers(requested_output, groups, options)
     except KeyboardInterrupt:
         print('Interrupted; worker processes stopped.', file=sys.stderr)
         return 130

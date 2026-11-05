@@ -99,7 +99,7 @@ These are the default sampling settings: PTX generates 32 candidates using four 
 runs/five_cases/targets/<target>/ensemble.cif
 ```
 
-Use a new output directory for each run. See the [example guide](examples/README.md) for the included systems and alignments.
+You can reuse the same command: if `--out` already exists, OriDynamic automatically adds a host name, timestamp, and unique suffix, preserving earlier results. The actual output directory is printed at startup. See the [example guide](examples/README.md) for the included systems and alignments.
 
 **Run on four GPUs**
 

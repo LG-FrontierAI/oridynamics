@@ -14,6 +14,8 @@ from unittest import mock
 from oridynamic import multi_gpu
 from oridynamic.complex_inputs import load_native_targets
 
+EXAMPLES = Path(__file__).resolve().parents[1] / 'examples'
+
 
 class MultiGpuTests(unittest.TestCase):
     def test_visibility_and_duplicate_guards(self):
@@ -29,7 +31,7 @@ class MultiGpuTests(unittest.TestCase):
 
     def test_real_examples_preserve_complete_systems_and_msas(self):
         args = SimpleNamespace(msa_local_db=None, single_sequence=False, limit=None)
-        source = multi_gpu.ROOT / 'examples/five_cases_with_msa.json'
+        source = EXAMPLES / 'five_cases_with_msa.json'
         targets = load_native_targets(source, args)
         groups = multi_gpu.split_targets(targets, [('0', '0'), ('1', '1'), ('2', '2'), ('3', '3')])
         samples = [sample for group in groups for sample in group['targets']]
@@ -73,7 +75,7 @@ class MultiGpuTests(unittest.TestCase):
             (root / 'common').mkdir()
             for name in ('components.cif', 'components.cif.rdkit_mol.pkl'):
                 (root / 'common' / name).write_bytes(b'path-check-only')
-            argv = ['--input-json', str(multi_gpu.ROOT / 'examples/five_cases_with_msa.json'),
+            argv = ['--input-json', str(EXAMPLES / 'five_cases_with_msa.json'),
                     '--gpus', '0,1', '--paths', str(weights), '--assets-root', str(root),
                     '--out', str(root / 'new_run'), '--sample-chunk-size', '2', '--plan']
             environment = dict(os.environ, CUDA_VISIBLE_DEVICES='2,3', PYTHONDONTWRITEBYTECODE='1')
@@ -85,8 +87,13 @@ class MultiGpuTests(unittest.TestCase):
             self.assertEqual(plan['sample_chunk_size'], 2)
             self.assertFalse((root / 'new_run').exists())
             (root / 'new_run').mkdir()
-            with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
-                multi_gpu.main(argv)
+            result = subprocess.run([sys.executable, '-B', '-c', code], cwd=multi_gpu.ROOT,
+                                    env=environment, text=True, capture_output=True, check=True)
+            repeated = json.loads(result.stdout)
+            self.assertNotEqual(repeated['output'], str(root / 'new_run'))
+            self.assertEqual(repeated['requested_output'], str(root / 'new_run'))
+            self.assertFalse(Path(repeated['output']).exists())
+            self.assertEqual(list((root / 'new_run').iterdir()), [])
 
     def test_processes_isolate_outputs_and_propagate_failure(self):
         real_popen = subprocess.Popen
@@ -118,8 +125,17 @@ raise SystemExit(7 if targets[0]['name'] == 'fail' else 0)
                     self.assertEqual(received['device'], expected)
                     self.assertEqual(received['args'][-len(options):], options)
                     self.assertEqual(received['args'][received['args'].index('--device') + 1], 'cuda:0')
-                with self.assertRaises(FileExistsError):
-                    multi_gpu.run_workers(root, groups, options)
+                original = (root / 'multi_gpu.json').read_bytes()
+                with mock.patch.object(multi_gpu.subprocess, 'Popen', side_effect=spawn), redirect_stdout(io.StringIO()):
+                    self.assertEqual(multi_gpu.run_workers(root, groups, options), status)
+                self.assertEqual((root / 'multi_gpu.json').read_bytes(), original)
+                new_root, = root.parent.glob('run_*')
+                repeated = json.loads((new_root / 'multi_gpu.json').read_text())
+                self.assertEqual(repeated['output'], str(new_root))
+                self.assertEqual(repeated['requested_output'], str(root))
+                for worker in repeated['workers']:
+                    self.assertTrue(Path(worker['output']).is_relative_to(new_root))
+                    self.assertTrue((Path(worker['output']) / 'received.json').exists())
 
     def test_automatic_outputs_are_unique(self):
         first, second = multi_gpu.automatic_output(), multi_gpu.automatic_output()

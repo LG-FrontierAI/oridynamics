@@ -16,6 +16,7 @@ from oridynamic.prepare import (AMINO_ACIDS, DEFAULT_SEEDS, DEFAULT_SAMPLES_PER_
                                DEFAULT_ANCHOR_CANDIDATES, DEFAULT_ANCHOR_SAMPLES_PER_SEED,
                                anchor_sampling_spec, fasta_records, file_info, seed_list)
 from oridynamic.complex_inputs import load_native_targets, proteins
+from oridynamic.output_paths import output_directory
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -33,7 +34,7 @@ def parser():
     p.add_argument('--structure-chain', help='Author chain ID of the initial structure for a single FASTA record')
     p.add_argument('--single-sequence', action='store_true', help='Allow query-only MSA for targets without alignments; for smoke testing')
     add_arguments(p)
-    p.add_argument('--out', type=Path, required=True, help='New output directory; existing runs are not overwritten or resumed')
+    p.add_argument('--out', type=Path, required=True, help='Output directory; if it exists, append a host/timestamp suffix automatically')
     p.add_argument('--paths', type=Path, default=os.environ.get('ORIDYNAMIC_PATHS') or ROOT / 'configs/portable_paths.example.json')
     p.add_argument('--assets-root', type=Path, default=os.environ.get('ORIDYNAMIC_ASSETS') or ROOT / 'assets', help='Read-only CCD resource root')
     p.add_argument('--seeds', default=DEFAULT_SEEDS, help='Comma-separated generation seeds (default: 0,1,2,3)')
@@ -161,9 +162,8 @@ def main(argv=None):
     if a.single_sequence and a.msa_local_db:
         raise ValueError('Query-only MSA and local search are mutually exclusive')
     targets = load_targets(a)
-    a.out = a.out.absolute()
-    if a.out.exists() or a.out.is_symlink():
-        raise ValueError(f'Output already exists; refusing to overwrite: {a.out}')
+    requested_output = a.out.absolute()
+    a.out = output_directory(requested_output)
     if not a.assets_root.is_dir():
         raise ValueError(f"CCD resource directory not found: {a.assets_root}. Set ORIDYNAMIC_ASSETS or --assets-root; see INSTALL.md.")
     a.assets_root = a.assets_root.resolve()
@@ -183,9 +183,10 @@ def main(argv=None):
         select_runtime(Path(paths['runtime_source_root']))
     if a.msa_local_db:
         a.msa_local_db = a.msa_local_db.resolve(strict=True)
-        if a.out.resolve().is_relative_to(a.msa_local_db):
+        if requested_output.resolve().is_relative_to(a.msa_local_db) or a.out.resolve().is_relative_to(a.msa_local_db):
             raise ValueError('Output cannot be inside the MSA database directory')
     plan = dict(schema='oridynamic_resident_batch_v1', targets=targets,
+        requested_output=str(requested_output), output=str(a.out),
         seeds=seeds, samples_per_seed=a.samples_per_seed, sample_chunk_size=a.sample_chunk_size,
         anchor_candidates=a.anchor_candidates, anchor_sampling=anchor_sampling,
         phase_order=['all_base_anchors_and_contexts', 'all_joint_ensembles'],
@@ -198,7 +199,9 @@ def main(argv=None):
         # 在切换到输出目录之前解析相对可执行路径。
         a.msa_search_executable = executable(a.msa_search_executable)
         a.msa_mmseqs = executable(a.msa_mmseqs)
-    a.out.mkdir(parents=True, exist_ok=False)
+    a.out = output_directory(requested_output, create=True)
+    plan['output'] = str(a.out)
+    print(f'[Output] {a.out}', flush=True)
     started = time.perf_counter()
     a.timing = TimingLog(a.out, started)
     a.check = False

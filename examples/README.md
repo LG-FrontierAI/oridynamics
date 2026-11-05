@@ -15,7 +15,7 @@ oridynamic sample --input-json examples/five_cases_with_msa.json \
   --out runs/five_cases
 ```
 
-This generates 32 final conformations per system, or 160 in total. For each system, PTX uses four seeds with eight candidates each and selects the highest-ranked initial structure; four ensemble seeds then generate eight samples each. PTX evaluates the trunk once per seed and shares its output across that seed's candidates. Each final ensemble is saved as `runs/five_cases/targets/<name>/ensemble.cif`. Use a new output directory for each run. Add `--plan` to validate inputs and resource paths without model inference or output creation.
+This generates 32 final conformations per system, or 160 in total. For each system, PTX uses four seeds with eight candidates each and selects the highest-ranked initial structure; four ensemble seeds then generate eight samples each. PTX evaluates the trunk once per seed and shares its output across that seed's candidates. On the first run, each final ensemble is saved as `runs/five_cases/targets/<name>/ensemble.cif`. If that output directory already exists, a host name, timestamp, and unique suffix are added automatically; the actual output directory is printed at startup. Add `--plan` to validate inputs and resource paths and preview the output path without model inference or output creation.
 
 For a larger ensemble, increase `--samples-per-seed`.
 
@@ -34,7 +34,7 @@ python -m oridynamic.multi_gpu \
 
 Each worker uses one GPU and processes complete systems, keeping all partners in a complex together. The launcher approximately balances the targets by protein residue count. Each target still receives 32 PTX candidates and 32 final samples; adding GPUs does not multiply the sample count. A single system is not split across GPUs, and GPU memory is not pooled. The five examples can use up to five workers.
 
-Without `--out`, the launcher creates `runs/multigpu_<host>_<timestamp>_<unique ID>/`. Worker logs are in `logs/gpu_<index>.log`, progress is recorded in `multi_gpu.json`, and final structures are in `gpu_<index>/targets/<name>/ensemble.cif`. An explicit `--out` must name a new directory. Code, weights, CCD files, and source MSAs are reused; each worker writes its own outputs and caches. Shared resources do not need to be downloaded again on another machine.
+Without `--out`, the launcher creates `runs/multigpu_<host>_<timestamp>_<unique ID>/`. Worker logs are in `logs/gpu_<index>.log`, progress is recorded in `multi_gpu.json`, and final structures are in `gpu_<index>/targets/<name>/ensemble.cif`. An explicit `--out` receives a host/timestamp/unique suffix automatically if it already exists. Code, weights, CCD files, and source MSAs are reused; each worker writes its own outputs and caches. Shared resources do not need to be downloaded again on another machine.
 
 GPU indices refer to the devices exposed by `CUDA_VISIBLE_DEVICES` when it is set. Add `--plan` to preview the assignment and validate input/resource paths without starting workers or creating output directories; this does not check GPU availability or memory capacity.
 

@@ -2,6 +2,7 @@
 import copy
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -238,6 +239,36 @@ class ResidentBatchTests(unittest.TestCase):
             self.assertTrue((a.out/'targets/one/provided.a3m').is_file())
             self.assertFalse((a.out/'targets/one/msa').exists())
             self.assertEqual(engine.load_base.call_count,1);self.assertEqual(engine.load_joint.call_count,1)
+
+    def test_repeated_output_uses_new_directory_for_all_runtime_paths(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); a = self.args(root, single_sequence=True)
+            resources = self.fake_resources(root)
+            destinations = []
+            def build(args, weights):
+                destinations.append(args.out)
+                self.assertEqual(os.environ['HF_HOME'], str(args.out / '.cache/huggingface'))
+                return mock.Mock(results=[], load_counts=dict(native=1, codec=1, joint=1))
+            cwd = Path.cwd()
+            previous = None
+            try:
+                for _ in range(2):
+                    with mock.patch.dict(os.environ), mock.patch(
+                            'oridynamic.batch_runtime.ResidentRuntime', side_effect=build), redirect_stdout(io.StringIO()):
+                        cli.main(['--fasta', str(a.fasta), '--out', str(a.out), '--single-sequence', *resources])
+                    os.chdir(cwd)
+                    request = json.loads((destinations[-1] / 'request.json').read_text())
+                    self.assertEqual(request['output'], str(destinations[-1]))
+                    self.assertEqual(request['requested_output'], str(a.out))
+                    self.assertTrue((destinations[-1] / 'targets/one/query.a3m').exists())
+                    if previous is None:
+                        previous = (a.out / 'request.json').read_bytes()
+                    else:
+                        self.assertEqual((a.out / 'request.json').read_bytes(), previous)
+            finally:
+                os.chdir(cwd)
+            self.assertEqual(destinations[0], a.out)
+            self.assertNotEqual(destinations[0], destinations[1])
 
     def test_resident_sample_twice_real_tiny_codec_dit_diffusion(self):
         # 真正执行新sample路径和受限缓存；只替换trunk及CUDA管理，不伪造生成器输出。

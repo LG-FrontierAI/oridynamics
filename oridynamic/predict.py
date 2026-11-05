@@ -14,6 +14,7 @@ from oridynamic.prepare import (DEFAULT_SEEDS, DEFAULT_SAMPLES_PER_SEED,
                                anchor_sampling_spec, build_request, file_info)
 from oridynamic.local_msa import add_arguments, attach_local_msa, preflight, validate_modes
 from oridynamic.inference_timing import TimingLog
+from oridynamic.output_paths import output_directory
 
 
 def select_runtime(root: Path) -> Path:
@@ -38,7 +39,7 @@ def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--fasta", type=Path, required=True, help="One protein sequence")
     p.add_argument("--name", help="Target name; defaults to the FASTA header")
-    p.add_argument("--out", type=Path, required=True, help="New output directory; existing output is not overwritten")
+    p.add_argument("--out", type=Path, required=True, help="Output directory; if it exists, append a host/timestamp suffix automatically")
     p.add_argument("--paths", type=Path, default=os.environ.get("ORIDYNAMIC_PATHS") or here / "configs/portable_paths.example.json", help="Read-only checkpoint path JSON; paths are relative to that JSON file")
     p.add_argument("--runtime-root", type=Path, help="Legacy option; only this release directory is accepted")
     p.add_argument("--assets-root", type=Path, default=os.environ.get("ORIDYNAMIC_ASSETS") or here / "assets", help="Read-only native PTX CCD resource root")
@@ -103,10 +104,10 @@ def main(argv=None):
         for filename in ("common/components.cif", "common/components.cif.rdkit_mol.pkl"):
             if not (a.assets_root / filename).is_file():
                 raise ValueError(f"Missing read-only CCD resource: {a.assets_root / filename}; automatic download is disabled")
-        if a.out.exists() or a.out.is_symlink():
-            raise ValueError(f"Output exists; choose a new directory: {a.out}")
-        a.out = a.out.absolute()
-        a.out.mkdir(parents=True, exist_ok=False)
+        requested_output = a.out.absolute()
+        a.out = output_directory(requested_output, create=True)
+        request.update(requested_output=str(requested_output), output=str(a.out))
+        print(f'[Output] {a.out}', flush=True)
     except (ValueError, OSError, KeyError) as exc:
         p.error(str(exc))
 
