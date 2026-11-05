@@ -14,7 +14,7 @@ Monomers, protein–ligand complexes, and protein–protein assemblies use the s
 
 ## Sampling configuration
 
-When an initial structure is supplied, it becomes the decoder anchor. Otherwise, the backbone predicts 32 candidates by default, using 200 SDE steps and ten trunk cycles for each, and selects the highest native ranking score. The number of candidates is controlled by `--anchor-candidates`.
+When an initial structure is supplied, it becomes the decoder anchor. Otherwise, the backbone predicts 32 candidates by default: sixteen seeds (`0–15`) with two samples per seed. Each seed runs ten trunk cycles, followed by 200-step SDE sampling, and the highest native ranking score selects one initial structure across all candidates. The total number of candidates is controlled by `--anchor-candidates`.
 
 The released model uses the same LoRA-adapted trunk context for the frozen autoencoder, flow module, and refine module. The selected anchor defines the canonical coordinate frame. Explicit reference conditioning in the latent flow module is disabled.
 

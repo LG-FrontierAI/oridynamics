@@ -13,7 +13,8 @@ AMINO_ACIDS = set("ACDEFGHIKLMNPQRSTVWYX")
 DEFAULT_SEEDS = "0,1,2,3"
 DEFAULT_SAMPLES_PER_SEED = 8
 DEFAULT_ANCHOR_CANDIDATES = 32
-DEFAULT_ANCHOR_SAMPLES_PER_SEED = 8
+DEFAULT_ANCHOR_SAMPLES_PER_SEED = 2
+DEFAULT_ANCHOR_SEED = 0
 
 
 def anchor_sampling_spec(seed: int, candidates: int,
@@ -98,7 +99,7 @@ def build_request(args: argparse.Namespace) -> tuple[list[dict], dict]:
         msa = {"mode": "provided", "input": file_info(args.msa_a3m),
                "validation": "query_only_native_featurizer_not_run"}
         protein["unpairedMsaPath"] = msa["input"]["path"]
-    anchor_seed = getattr(args, "anchor_seed", 101)
+    anchor_seed = getattr(args, "anchor_seed", DEFAULT_ANCHOR_SEED)
     anchor_candidates = getattr(args, "anchor_candidates", DEFAULT_ANCHOR_CANDIDATES)
     anchor = {"source": "ptx_predict", "policy": "native_ranking_score_top1",
               **anchor_sampling_spec(anchor_seed, anchor_candidates,

@@ -14,7 +14,7 @@ oridynamic sample \
   --out runs/five_cases
 ```
 
-This generates 32 final conformations per system, or 160 in total. For each system, PTX uses four seeds with eight candidates each and selects the highest-ranked initial structure; four ensemble seeds then generate eight samples each. PTX evaluates the trunk once per seed and shares its output across that seed's candidates. On the first run, each final ensemble is saved as `runs/five_cases/targets/<name>/ensemble.cif`. If that output directory already exists, a host name, timestamp, and unique suffix are added automatically; the actual output directory is printed at startup. Add `--plan` to validate inputs and resource paths and preview the output path without model inference or output creation.
+This generates 32 final conformations per system, or 160 in total. For each system, PTX uses sixteen seeds (`0–15`) with two candidates each and selects the highest-ranked initial structure; four ensemble seeds then generate eight samples each. PTX evaluates the trunk once per seed and shares its output across that seed's candidates. On the first run, each final ensemble is saved as `runs/five_cases/targets/<name>/ensemble.cif`. If that output directory already exists, a host name, timestamp, and unique suffix are added automatically; the actual output directory is printed at startup. Add `--plan` to validate inputs and resource paths and preview the output path without model inference or output creation.
 
 For a larger ensemble, increase `--samples-per-seed`.
 
@@ -38,13 +38,13 @@ GPU indices refer to the devices exposed by `CUDA_VISIBLE_DEVICES` when it is se
 
 ## Custom sampling options
 
-Both commands default to 32 PTX candidates (four seeds × eight), 32 final conformations per system (four seeds × eight), and `--sample-chunk-size 1`. To set these options and the output directory explicitly:
+Both commands default to 32 PTX candidates (sixteen seeds × two), 32 final conformations per system (four seeds × eight), and `--sample-chunk-size 1`. To set these options and the output directory explicitly:
 
 ```bash
 python -m oridynamic.multi_gpu \
   --input-json examples/five_cases_with_msa.json \
   --gpus 0,2 \
-  --anchor-candidates 32 --anchor-samples-per-seed 8 \
+  --anchor-candidates 32 --anchor-samples-per-seed 2 --anchor-seed 0 \
   --seeds 0,1,2,3 --samples-per-seed 8 \
   --sample-chunk-size 4 \
   --out runs/custom

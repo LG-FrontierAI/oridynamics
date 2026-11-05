@@ -85,6 +85,10 @@ class MultiGpuTests(unittest.TestCase):
             plan = json.loads(result.stdout)
             self.assertEqual([w['cuda_device'] for w in plan['workers']], ['2', '3'])
             self.assertEqual(plan['sample_chunk_size'], 2)
+            self.assertEqual(plan['anchor_sampling']['seeds'], list(range(16)))
+            self.assertEqual(plan['anchor_sampling']['groups'], [dict(seed=s, samples=2) for s in range(16)])
+            self.assertEqual(plan['seeds'], '0,1,2,3')
+            self.assertEqual(plan['samples_per_seed'], 8)
             self.assertFalse((root / 'new_run').exists())
             (root / 'new_run').mkdir()
             result = subprocess.run([sys.executable, '-B', '-c', code], cwd=multi_gpu.ROOT,

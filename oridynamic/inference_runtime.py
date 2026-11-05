@@ -261,7 +261,7 @@ def choose_anchor(coordinates, scores, n_atoms=None):
 
 
 def predict_anchor(native, features, args, n_atoms):
-    """复用原生多样本入口：每个seed只算一次trunk，默认四组各八个候选。"""
+    """复用原生多样本入口：每个seed只算一次trunk，默认十六组各两个候选。"""
     from oridynamic.prepare import anchor_sampling_spec
     from oridynamic import runtime_utils as runner
     spec = anchor_sampling_spec(args.anchor_seed, args.anchor_candidates, args.anchor_samples_per_seed)

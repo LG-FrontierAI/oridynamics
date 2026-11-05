@@ -24,8 +24,8 @@ class PreparationTests(unittest.TestCase):
         self.assertEqual(native[0]["sequences"][0]["proteinChain"],
                          {"sequence": "ACDEFG", "count": 1})
         self.assertEqual(request["ensemble"]["total_samples"], 250)
-        self.assertEqual(request["anchor"]["seeds"], [101, 102, 103, 104])
-        self.assertEqual(request["anchor"]["samples_per_seed"], 8)
+        self.assertEqual(request["anchor"]["seeds"], list(range(16)))
+        self.assertEqual(request["anchor"]["samples_per_seed"], 2)
         self.assertEqual(request["anchor"]["total_candidates"], 32)
         self.assertFalse(request["ready_for_inference"])
         self.args.sample_chunk_size = 16
@@ -36,12 +36,14 @@ class PreparationTests(unittest.TestCase):
 
     def test_anchor_groups_respect_total_and_seed_bounds(self):
         self.assertEqual(anchor_sampling_spec(7, 10)['groups'],
+                         [dict(seed=s, samples=2) for s in range(7, 12)])
+        self.assertEqual(anchor_sampling_spec(7, 10, 8)['groups'],
                          [dict(seed=7, samples=8), dict(seed=8, samples=2)])
         self.assertEqual(anchor_sampling_spec(7, 32, 32)['seeds'], [7])
         self.assertEqual(anchor_sampling_spec(7, 4, 1)['seeds'], [7, 8, 9, 10])
-        self.assertEqual(anchor_sampling_spec(2**32 - 1, 8)['seeds'], [2**32 - 1])
+        self.assertEqual(anchor_sampling_spec(2**32 - 1, 2)['seeds'], [2**32 - 1])
         for seed, count, per_seed in [(-1, 32, 8), (2**32 - 1, 9, 8),
-                                      (1, 0, 8), (1, 33, 8), (1, 32, 0)]:
+                                      (2**32 - 1, 3, 2), (1, 0, 8), (1, 33, 8), (1, 32, 0)]:
             with self.subTest(seed=seed, count=count, per_seed=per_seed), self.assertRaises(ValueError):
                 anchor_sampling_spec(seed, count, per_seed)
 

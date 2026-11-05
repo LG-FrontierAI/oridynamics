@@ -115,7 +115,7 @@ Systems are distributed across the selected GPUs, with each system staying on on
 runs/multigpu_<host>_<timestamp>_<unique ID>/gpu_<index>/targets/<target>/ensemble.cif
 ```
 
-Both commands use the same defaults: **32 PTX candidates** (4 seeds × 8), **32 final conformations per system** (4 seeds × 8; 160 across the five examples), and a sample chunk size of **1**. Add `--plan` to preview the run. See the [example guide](examples/README.md) for GPU selection, outputs, and alignments.
+Both commands use the same defaults: **32 PTX candidates** (16 seeds, `0–15`, × 2), **32 final conformations per system** (4 seeds × 8; 160 across the five examples), and a sample chunk size of **1**. Add `--plan` to preview the run. See the [example guide](examples/README.md) for GPU selection, outputs, and alignments.
 
 <details>
 <summary><strong>Custom sampling options</strong></summary>
@@ -126,7 +126,7 @@ To set the GPUs, sampling budget, chunk size, and output explicitly:
 python -m oridynamic.multi_gpu \
   --input-json examples/five_cases_with_msa.json \
   --gpus 0,2 \
-  --anchor-candidates 32 --anchor-samples-per-seed 8 \
+  --anchor-candidates 32 --anchor-samples-per-seed 2 --anchor-seed 0 \
   --seeds 0,1,2,3 --samples-per-seed 8 \
   --sample-chunk-size 4 \
   --out runs/custom

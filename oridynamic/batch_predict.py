@@ -13,7 +13,7 @@ import time
 from oridynamic.inference_timing import TimingLog
 from oridynamic.local_msa import add_arguments, executable, run_search, validate_a3m, write_json
 from oridynamic.prepare import (AMINO_ACIDS, DEFAULT_SEEDS, DEFAULT_SAMPLES_PER_SEED,
-                               DEFAULT_ANCHOR_CANDIDATES, DEFAULT_ANCHOR_SAMPLES_PER_SEED,
+                               DEFAULT_ANCHOR_CANDIDATES, DEFAULT_ANCHOR_SAMPLES_PER_SEED, DEFAULT_ANCHOR_SEED,
                                anchor_sampling_spec, fasta_records, file_info, seed_list)
 from oridynamic.complex_inputs import load_native_targets, proteins
 from oridynamic.output_paths import output_directory
@@ -41,8 +41,8 @@ def parser():
     p.add_argument('--samples-per-seed', type=int, default=DEFAULT_SAMPLES_PER_SEED, help='Final conformations per seed (default: 8)')
     p.add_argument('--sample-chunk-size', type=int, default=1)
     p.add_argument('--anchor-candidates', type=int, default=DEFAULT_ANCHOR_CANDIDATES, help='Total PTX anchor candidates (default: 32); select the top-ranked one')
-    p.add_argument('--anchor-samples-per-seed', type=int, default=DEFAULT_ANCHOR_SAMPLES_PER_SEED, help='PTX candidates sharing one trunk evaluation per seed (default: 8)')
-    p.add_argument('--anchor-seed', type=int, default=101, help='First PTX seed; incremented once per candidate group (default: 101)')
+    p.add_argument('--anchor-samples-per-seed', type=int, default=DEFAULT_ANCHOR_SAMPLES_PER_SEED, help='PTX candidates sharing one trunk evaluation per seed (default: 2)')
+    p.add_argument('--anchor-seed', type=int, default=DEFAULT_ANCHOR_SEED, help='First PTX seed; incremented once per candidate group (default: 0)')
     p.add_argument('--attention-chunk-size', type=int, default=32)
     p.add_argument('--attention-backend', choices=('torch', 'cuequivariance'), default='torch')
     p.add_argument('--device', default='cuda:0')

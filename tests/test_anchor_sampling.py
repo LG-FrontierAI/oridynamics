@@ -16,6 +16,7 @@ from ml_collections import ConfigDict
 from fixture_inference import _example, _tiny_config
 from oridynamic.inference_runtime import predict_anchor
 from oridynamic.inference_timing import TimingLog
+from oridynamic.batch_predict import parser
 from protenix.model.generator import InferenceNoiseScheduler
 from protenix.model.modules.diffusion import DiffusionModule
 from protenix.model.protenix import Protenix
@@ -28,8 +29,8 @@ class AnchorSamplingTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         timer = TimingLog(self.temp.name)
         timer.configure_cuda(lambda: None, device='cpu_fixture')
-        self.args = SimpleNamespace(anchor_seed=101, anchor_candidates=32,
-                                    anchor_samples_per_seed=8, timing=timer)
+        self.args = parser().parse_args(['--fasta', 'fixture.fasta', '--out', self.temp.name])
+        self.args.timing = timer
         root = Path(__file__).resolve().parents[1]
         cfg = ConfigDict(json.loads((root / 'configs/inference_defaults.json').read_text()))
         cfg.sample_diffusion.N_step = 2  # 仅缩短CPU测试；正式入口仍校验SDE200。
@@ -69,12 +70,12 @@ class AnchorSamplingTests(unittest.TestCase):
                 side_effect=self.summary), torch.no_grad():
             return predict_anchor(self.native, self.features, self.args, 6)
 
-    def test_four_trunks_generate_32_real_diffusion_samples_and_rank_all(self):
+    def test_sixteen_trunks_generate_32_real_diffusion_samples_and_rank_all(self):
         before = copy.deepcopy(self.features)
         anchor, selection = self.predict()
-        self.assertEqual(self.native.get_pairformer_output.call_count, 4)
-        self.assertEqual([len(g) for g in self.groups], [8, 8, 8, 8])
-        self.assertEqual(selection['seeds'], [101, 102, 103, 104])
+        self.assertEqual(self.native.get_pairformer_output.call_count, 16)
+        self.assertEqual([len(g) for g in self.groups], [2] * 16)
+        self.assertEqual(selection['seeds'], list(range(16)))
         self.assertEqual(selection['scores'], list(map(float, range(32))))
         self.assertEqual(selection['selected'], 31)
         coordinates = torch.cat(self.groups)
@@ -86,12 +87,13 @@ class AnchorSamplingTests(unittest.TestCase):
             if torch.is_tensor(value): torch.testing.assert_close(self.features[k], value)
         stages = self.args.timing.data['stages']
         self.assertEqual([(s['seed'], s['candidates']) for s in stages],
-                         [(101, 8), (102, 8), (103, 8), (104, 8)])
+                         [(s, 2) for s in range(16)])
         for call in self.native.get_pairformer_output.call_args_list:
             self.assertEqual(call.kwargs['N_cycle'], 10)
 
     def test_partial_group_keeps_exact_budget_and_restores_config(self):
         self.args.anchor_candidates = 10
+        self.args.anchor_samples_per_seed = 8
         anchor, selection = self.predict()
         self.assertEqual([len(g) for g in self.groups], [8, 2])
         self.assertEqual(self.native.get_pairformer_output.call_count, 2)
@@ -111,6 +113,7 @@ class AnchorSamplingTests(unittest.TestCase):
 
     def test_count_mismatch_fails_and_restores_config(self):
         self.args.anchor_candidates = 10
+        self.args.anchor_samples_per_seed = 8
         def bad_summary(**kwargs):
             if len(kwargs['atom_coordinate']) == 8:
                 return self.summary(**kwargs)
