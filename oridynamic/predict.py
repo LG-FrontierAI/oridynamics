@@ -10,7 +10,8 @@ import sys
 import time
 
 from oridynamic.prepare import (DEFAULT_SEEDS, DEFAULT_SAMPLES_PER_SEED,
-                               DEFAULT_ANCHOR_CANDIDATES, build_request, file_info)
+                               DEFAULT_ANCHOR_CANDIDATES, DEFAULT_ANCHOR_SAMPLES_PER_SEED,
+                               anchor_sampling_spec, build_request, file_info)
 from oridynamic.local_msa import add_arguments, attach_local_msa, preflight, validate_modes
 from oridynamic.inference_timing import TimingLog
 
@@ -50,8 +51,9 @@ def main(argv=None):
     p.add_argument("--msa-server-mode", choices=("protenix", "colabfold"), default="protenix")
     p.add_argument("--single-sequence", action="store_true", help="Offline query-only MSA for smoke testing; not the normal quality protocol")
     add_arguments(p)
-    p.add_argument("--anchor-candidates", type=int, default=DEFAULT_ANCHOR_CANDIDATES, help="PTX anchor candidates, each with a separate seed (default: 32)")
-    p.add_argument("--anchor-seed", type=int, default=101)
+    p.add_argument("--anchor-candidates", type=int, default=DEFAULT_ANCHOR_CANDIDATES, help="Total PTX anchor candidates (default: 32)")
+    p.add_argument("--anchor-samples-per-seed", type=int, default=DEFAULT_ANCHOR_SAMPLES_PER_SEED, help="PTX candidates sharing one trunk evaluation per seed (default: 8)")
+    p.add_argument("--anchor-seed", type=int, default=101, help="First PTX seed; incremented once per candidate group (default: 101)")
     p.add_argument("--attention-chunk-size", type=int, default=32, help="Attention chunk size for trunk, codec, and refiner")
     p.add_argument("--attention-backend", choices=("torch", "cuequivariance"), default="torch")
     p.add_argument("--device", default="cuda:0")
@@ -61,10 +63,9 @@ def main(argv=None):
     a = p.parse_args(argv)
     try:
         validate_modes(a)
-        if not 1 <= a.anchor_candidates <= 32 or a.attention_chunk_size < 1:
-            raise ValueError("Anchor candidates must be 1-32 and attention chunk size must be positive")
-        if not 0 <= a.anchor_seed < 2**32 - a.anchor_candidates + 1:
-            raise ValueError("Invalid anchor seed range")
+        anchor_sampling_spec(a.anchor_seed, a.anchor_candidates, a.anchor_samples_per_seed)
+        if a.attention_chunk_size < 1:
+            raise ValueError("Attention chunk size must be positive")
         native_input, request = build_request(a)
         a.fasta = a.fasta.resolve()
         if a.initial_structure:
@@ -85,9 +86,6 @@ def main(argv=None):
         request.pop("ready_for_inference", None)
         if a.single_sequence:
             request["msa"] = {"mode": "single_sequence", "server_used": False}
-        if not a.initial_structure:
-            request["anchor"].update(candidate_seeds=list(range(a.anchor_seed, a.anchor_seed+a.anchor_candidates)),
-                                     samples_per_seed=1)
         paths = json.loads(a.paths.read_text())
         a.runtime_root = select_runtime(a.runtime_root or here)
         if paths.get("runtime_source_root"):

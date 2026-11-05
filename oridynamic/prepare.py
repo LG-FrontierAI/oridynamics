@@ -13,6 +13,20 @@ AMINO_ACIDS = set("ACDEFGHIKLMNPQRSTVWYX")
 DEFAULT_SEEDS = "0,1,2,3"
 DEFAULT_SAMPLES_PER_SEED = 8
 DEFAULT_ANCHOR_CANDIDATES = 32
+DEFAULT_ANCHOR_SAMPLES_PER_SEED = 8
+
+
+def anchor_sampling_spec(seed: int, candidates: int,
+                         samples_per_seed: int = DEFAULT_ANCHOR_SAMPLES_PER_SEED) -> dict:
+    """PTX按seed分组；同一组候选共享一次trunk，末组可少于指定样本数。"""
+    if not 1 <= candidates <= 32 or not 1 <= samples_per_seed <= 32:
+        raise ValueError("Anchor candidates and anchor samples per seed must be 1-32")
+    groups = [dict(seed=seed + i, samples=min(samples_per_seed, candidates - start))
+              for i, start in enumerate(range(0, candidates, samples_per_seed))]
+    if not 0 <= seed or groups[-1]['seed'] >= 2**32:
+        raise ValueError("All PTX anchor seeds must be in [0, 2**32)")
+    return dict(sampling_strategy="shared_trunk_per_seed_v1", seeds=[g['seed'] for g in groups],
+                samples_per_seed=samples_per_seed, total_candidates=candidates, groups=groups)
 
 
 def file_info(path: Path) -> dict:
@@ -87,8 +101,8 @@ def build_request(args: argparse.Namespace) -> tuple[list[dict], dict]:
     anchor_seed = getattr(args, "anchor_seed", 101)
     anchor_candidates = getattr(args, "anchor_candidates", DEFAULT_ANCHOR_CANDIDATES)
     anchor = {"source": "ptx_predict", "policy": "native_ranking_score_top1",
-              "candidate_seeds": list(range(anchor_seed, anchor_seed + anchor_candidates)),
-              "samples_per_seed": 1,
+              **anchor_sampling_spec(anchor_seed, anchor_candidates,
+                                     getattr(args, "anchor_samples_per_seed", DEFAULT_ANCHOR_SAMPLES_PER_SEED)),
               "selection_executed": False}
     if args.initial_structure:
         if args.initial_structure.suffix.lower() not in {".cif", ".mmcif", ".pdb"}:

@@ -165,21 +165,7 @@ class ResidentRuntime:
                         anchor = rt.map_structure(a.initial_structure, atoms, a.structure_chain, a.structure_chains)
                     selection = dict(source='user_structure', input=target['initial_structure_identity'])
                 else:
-                    candidates, scores = [], []
-                    for i in range(a.anchor_candidates):
-                        runner.reset_template_probe_rng(a.anchor_seed+i)
-                        with a.timing.stage('ptx_anchor', gpu=True, candidate=i+1, seed=a.anchor_seed+i):
-                            pred = self.native(input_feature_dict=copy.deepcopy(features), label_full_dict=None,
-                                label_dict=None, mode='inference', mc_dropout_apply_rate=0., disable_inplace=True)[0]
-                            candidates.append(pred['coordinate'][0].detach().cpu().float())
-                            scores.append(float(pred['summary_confidence'][0]['ranking_score']))
-                            del pred
-                    index = rt.choose_anchor(candidates, scores, len(atoms))
-                    anchor = candidates[index]
-                    selection = dict(source='ptx_predict', policy='native_ranking_score_top1', selected=index,
-                        seeds=list(range(a.anchor_seed, a.anchor_seed+a.anchor_candidates)),
-                        scores=[v if np.isfinite(v) else None for v in scores])
-                    del candidates
+                    anchor, selection = rt.predict_anchor(self.native, features, a, len(atoms))
             rt.trace_inputs(a, 'base_context', c0)
             rt.trace_inputs(a, 'anchor', anchor)
             contract = dict(target=target, weights=self.hashes, code=self.code, dtype=a.dtype,

@@ -154,7 +154,7 @@
     "sigma_data": 16.0
   },
   "sample_diffusion": {
-    "N_sample": 1,
+    "N_sample": 8,
     "N_step": 200,
     "disable_augment": null,
     "gamma0": 0.8,

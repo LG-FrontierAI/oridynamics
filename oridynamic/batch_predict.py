@@ -13,7 +13,8 @@ import time
 from oridynamic.inference_timing import TimingLog
 from oridynamic.local_msa import add_arguments, executable, run_search, validate_a3m, write_json
 from oridynamic.prepare import (AMINO_ACIDS, DEFAULT_SEEDS, DEFAULT_SAMPLES_PER_SEED,
-                               DEFAULT_ANCHOR_CANDIDATES, fasta_records, file_info, seed_list)
+                               DEFAULT_ANCHOR_CANDIDATES, DEFAULT_ANCHOR_SAMPLES_PER_SEED,
+                               anchor_sampling_spec, fasta_records, file_info, seed_list)
 from oridynamic.complex_inputs import load_native_targets, proteins
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,8 +39,9 @@ def parser():
     p.add_argument('--seeds', default=DEFAULT_SEEDS, help='Comma-separated generation seeds (default: 0,1,2,3)')
     p.add_argument('--samples-per-seed', type=int, default=DEFAULT_SAMPLES_PER_SEED, help='Final conformations per seed (default: 8)')
     p.add_argument('--sample-chunk-size', type=int, default=1)
-    p.add_argument('--anchor-candidates', type=int, default=DEFAULT_ANCHOR_CANDIDATES, help='PTX candidates when no initial structure is supplied (default: 32); select the top-ranked one')
-    p.add_argument('--anchor-seed', type=int, default=101)
+    p.add_argument('--anchor-candidates', type=int, default=DEFAULT_ANCHOR_CANDIDATES, help='Total PTX anchor candidates (default: 32); select the top-ranked one')
+    p.add_argument('--anchor-samples-per-seed', type=int, default=DEFAULT_ANCHOR_SAMPLES_PER_SEED, help='PTX candidates sharing one trunk evaluation per seed (default: 8)')
+    p.add_argument('--anchor-seed', type=int, default=101, help='First PTX seed; incremented once per candidate group (default: 101)')
     p.add_argument('--attention-chunk-size', type=int, default=32)
     p.add_argument('--attention-backend', choices=('torch', 'cuequivariance'), default='torch')
     p.add_argument('--device', default='cuda:0')
@@ -155,8 +157,7 @@ def main(argv=None):
     seeds = seed_list(a.seeds)
     if min(a.samples_per_seed, a.sample_chunk_size, a.attention_chunk_size) < 1:
         raise ValueError('Sample counts and chunk sizes must be positive')
-    if not 1 <= a.anchor_candidates <= 32 or not 0 <= a.anchor_seed <= 2**32-a.anchor_candidates:
-        raise ValueError('Invalid anchor budget or seed range')
+    anchor_sampling = anchor_sampling_spec(a.anchor_seed, a.anchor_candidates, a.anchor_samples_per_seed)
     if a.single_sequence and a.msa_local_db:
         raise ValueError('Query-only MSA and local search are mutually exclusive')
     targets = load_targets(a)
@@ -186,7 +187,8 @@ def main(argv=None):
             raise ValueError('Output cannot be inside the MSA database directory')
     plan = dict(schema='oridynamic_resident_batch_v1', targets=targets,
         seeds=seeds, samples_per_seed=a.samples_per_seed, sample_chunk_size=a.sample_chunk_size,
-        anchor_candidates=a.anchor_candidates, phase_order=['all_base_anchors_and_contexts', 'all_joint_ensembles'],
+        anchor_candidates=a.anchor_candidates, anchor_sampling=anchor_sampling,
+        phase_order=['all_base_anchors_and_contexts', 'all_joint_ensembles'],
         online_search=False, weights={k:str(v) for k,v in weights.items()})
     if a.plan:
         print(json.dumps(plan, ensure_ascii=False, indent=2))

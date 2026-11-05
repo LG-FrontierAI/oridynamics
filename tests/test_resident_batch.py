@@ -208,6 +208,8 @@ class ResidentBatchTests(unittest.TestCase):
                     self.assertEqual(plan['seeds'],seeds)
                     self.assertEqual(plan['samples_per_seed'],count)
                     self.assertEqual(plan['anchor_candidates'],candidates)
+                    self.assertEqual(plan['anchor_sampling']['seeds'], [101,102,103,104] if candidates == 32 else [101])
+                    self.assertEqual(sum(g['samples'] for g in plan['anchor_sampling']['groups']), candidates)
                     search.assert_not_called();execute.assert_not_called();self.assertFalse(a.out.exists())
 
     def test_search_before_engine_and_query_not_replaced(self):

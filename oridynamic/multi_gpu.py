@@ -18,11 +18,12 @@ import uuid
 
 from oridynamic import batch_predict
 from oridynamic.complex_inputs import load_native_targets, native_sample
+from oridynamic.prepare import anchor_sampling_spec
 
 ROOT = Path(__file__).resolve().parents[1]
 OPTIONS = (
     'paths', 'assets_root', 'seeds', 'samples_per_seed', 'sample_chunk_size',
-    'anchor_candidates', 'anchor_seed', 'attention_chunk_size', 'attention_backend', 'dtype',
+    'anchor_candidates', 'anchor_samples_per_seed', 'anchor_seed', 'attention_chunk_size', 'attention_backend', 'dtype',
 )
 
 
@@ -213,6 +214,7 @@ def main(argv=None):
                      targets=[t['name'] for t in g['targets']]) for g in groups],
                 seeds=args.seeds, samples_per_seed=args.samples_per_seed,
                 sample_chunk_size=args.sample_chunk_size, anchor_candidates=args.anchor_candidates,
+                anchor_sampling=anchor_sampling_spec(args.anchor_seed, args.anchor_candidates, args.anchor_samples_per_seed),
                 status='preflight_only', gpu_availability='not_checked'), indent=2))
             return 0
         return run_workers(root, groups, options)

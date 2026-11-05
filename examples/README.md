@@ -15,7 +15,7 @@ oridynamic sample --input-json examples/five_cases_with_msa.json \
   --out runs/five_cases
 ```
 
-This generates 32 final conformations per system, or 160 in total. For each system, PTX generates 32 candidates and selects the highest-ranked initial structure; four ensemble seeds then generate eight samples each. Each final ensemble is saved as `runs/five_cases/targets/<name>/ensemble.cif`. Use a new output directory for each run. Add `--plan` to validate inputs and resource paths without model inference or output creation.
+This generates 32 final conformations per system, or 160 in total. For each system, PTX uses four seeds with eight candidates each and selects the highest-ranked initial structure; four ensemble seeds then generate eight samples each. PTX evaluates the trunk once per seed and shares its output across that seed's candidates. Each final ensemble is saved as `runs/five_cases/targets/<name>/ensemble.cif`. Use a new output directory for each run. Add `--plan` to validate inputs and resource paths without model inference or output creation.
 
 For a larger ensemble, increase `--samples-per-seed`.
 

@@ -108,7 +108,7 @@ def make_config(args, saved):
     cfg.triangle_multiplicative = args.attention_backend
     cfg.model.N_cycle = 10  # 仅原生anchor；C0和在线trunk分别显式4cycle。
     cfg.model.N_model_seed = 1
-    cfg.sample_diffusion.N_sample = 1
+    cfg.sample_diffusion.N_sample = min(args.anchor_candidates, args.anchor_samples_per_seed)
     require(cfg.sample_diffusion.N_step == 200, "Base Protenix native schedule has changed")
     require(all(cfg.sample_diffusion[k] == v for k, v in
             dict(gamma0=.8, gamma_min=1., noise_scale_lambda=1.003, step_scale_eta=1.5).items()),
@@ -260,6 +260,37 @@ def choose_anchor(coordinates, scores, n_atoms=None):
     return min(valid, key=lambda i: (-scores[i], i))
 
 
+def predict_anchor(native, features, args, n_atoms):
+    """复用原生多样本入口：每个seed只算一次trunk，默认四组各八个候选。"""
+    from oridynamic.prepare import anchor_sampling_spec
+    from oridynamic import runtime_utils as runner
+    spec = anchor_sampling_spec(args.anchor_seed, args.anchor_candidates, args.anchor_samples_per_seed)
+    require(native.N_model_seed == 1, "PTX model seeds are managed by the anchor sampling groups")
+    original_samples = native.configs.sample_diffusion.N_sample
+    candidates, scores = [], []
+    try:
+        for group in spec['groups']:
+            native.configs.sample_diffusion.N_sample = group['samples']
+            runner.reset_template_probe_rng(group['seed'])
+            with args.timing.stage('ptx_anchor', gpu=True, seed=group['seed'], candidates=group['samples']):
+                pred = native(input_feature_dict=copy.deepcopy(features), label_full_dict=None,
+                              label_dict=None, mode='inference', mc_dropout_apply_rate=0., disable_inplace=True)[0]
+                coordinates = pred['coordinate'].detach().cpu().float()
+                group_scores = [float(row['ranking_score']) for row in pred['summary_confidence']]
+                require(tuple(coordinates.shape) == (group['samples'], n_atoms, 3)
+                        and len(group_scores) == group['samples'], "PTX candidate coordinate/confidence counts differ")
+                candidates.extend(coordinates.unbind())
+                scores.extend(group_scores)
+                del pred
+    finally:
+        native.configs.sample_diffusion.N_sample = original_samples
+    selected = choose_anchor(candidates, scores, n_atoms)
+    anchor = candidates[selected].clone()
+    selection = dict(source='ptx_predict', policy='native_ranking_score_top1', **spec,
+                     selected=selected, scores=[s if np.isfinite(s) else None for s in scores])
+    return anchor, selection
+
+
 def make_batch(features, anchor, context):
     from protenix.model.coordinate_frame import canonicalize_batch
     from oridynamic.runtime_utils import reference_token_centroids
@@ -389,22 +420,7 @@ def run(args, paths, weights, native_input):
                 c0 = tuple(x.detach().cpu() for x in c0)
             trace_inputs(args, 'base_context', c0)
             if user_anchor is None:
-                candidates, scores = [], []
-                for i in range(args.anchor_candidates):
-                    runner.reset_template_probe_rng(args.anchor_seed + i)
-                    print(f"[PTX anchor] {i+1}/{args.anchor_candidates}; noise-initialized SDE200", flush=True)
-                    with timer.stage('ptx_anchor', gpu=True, candidate=i+1, seed=args.anchor_seed+i):
-                        pred = native(input_feature_dict=copy.deepcopy(features), label_full_dict=None,
-                                      label_dict=None, mode="inference", mc_dropout_apply_rate=0., disable_inplace=True)[0]
-                        candidates.append(pred["coordinate"][0].detach().cpu().float())
-                        scores.append(float(pred["summary_confidence"][0]["ranking_score"]))
-                        del pred
-                selected = choose_anchor(candidates, scores, len(atoms))
-                user_anchor = candidates[selected]
-                report["anchor_selection"] = dict(policy="native_ranking_score_top1",
-                    scores=[value if np.isfinite(value) else None for value in scores],
-                    seeds=list(range(args.anchor_seed, args.anchor_seed + args.anchor_candidates)), selected=selected)
-                del candidates
+                user_anchor, report['anchor_selection'] = predict_anchor(native, features, args, len(atoms))
         with timer.stage('native_offload', gpu=True):
             native.cpu()
             del features

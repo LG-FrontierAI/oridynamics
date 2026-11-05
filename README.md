@@ -91,7 +91,7 @@ oridynamic sample \
   --out runs/five_cases
 ```
 
-These are the default sampling settings: select the top-ranked initial structure from 32 PTX candidates, then generate eight conformations for each of four seeds.
+These are the default sampling settings: PTX generates 32 candidates using four seeds with eight samples each, then selects the top-ranked initial structure. The ensemble stage uses four seeds with eight final conformations each.
 
 **Result:** 32 final conformations per system, saved together in:
 
