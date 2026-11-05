@@ -101,6 +101,8 @@ runs/five_cases/targets/<target>/ensemble.cif
 
 Use a new output directory for each run. See the [example guide](examples/README.md) for the included systems and alignments.
 
+To run the examples across several GPUs, follow the [multi-GPU instructions](examples/README.md#run-on-multiple-gpus).
+
 <details>
 <summary><strong>Use your own protein sequence</strong></summary>
 

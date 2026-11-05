@@ -19,6 +19,26 @@ This generates 32 final conformations per system, or 160 in total. For each syst
 
 For a larger ensemble, increase `--samples-per-seed`.
 
+## Run on multiple GPUs
+
+The standard `oridynamic sample` command uses one GPU. To distribute the examples across four GPUs, use:
+
+```bash
+python -m oridynamic.multi_gpu \
+  --input-json examples/five_cases_with_msa.json \
+  --gpus 0,1,2,3 \
+  --anchor-candidates 32 \
+  --seeds 0,1,2,3 --samples-per-seed 8 --sample-chunk-size 2
+```
+
+Each worker uses one GPU and processes complete systems, keeping all partners in a complex together. The launcher approximately balances the targets by protein residue count. Each target still receives 32 PTX candidates and 32 final samples; adding GPUs does not multiply the sample count. A single system is not split across GPUs, and GPU memory is not pooled. The five examples can use up to five workers.
+
+Without `--out`, the launcher creates `runs/multigpu_<host>_<timestamp>_<unique ID>/`. Worker logs are in `logs/gpu_<index>.log`, progress is recorded in `multi_gpu.json`, and final structures are in `gpu_<index>/targets/<name>/ensemble.cif`. An explicit `--out` must name a new directory. Code, weights, CCD files, and source MSAs are reused; each worker writes its own outputs and caches. Shared resources do not need to be downloaded again on another machine.
+
+GPU indices refer to the devices exposed by `CUDA_VISIBLE_DEVICES` when it is set. Add `--plan` to preview the assignment and validate input/resource paths without starting workers or creating output directories; this does not check GPU availability or memory capacity.
+
+`--sample-chunk-size` controls the number of ensemble samples processed together on each GPU. Larger values can improve throughput and require more memory; they do not change the final sample count or PTX candidate budget. The command above uses 2; use 1 if memory is insufficient. Changing chunk size can change individual stochastic samples even with the same seeds. H20 memory capacity and speed must be checked on the actual system.
+
 ## Included alignments
 
 | System | Type | Chain | Residues | A3M records, including query |

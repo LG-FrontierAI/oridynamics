@@ -64,6 +64,8 @@ Models remain in the process, with CPU/GPU offloading between phases and interme
 
 Additional controls include `--anchor-seed` (default 101), `--device` (default `cuda:0`), `--dtype` (`bf16` or `fp32`, default `bf16` for trunk/codec/DiT), and `--attention-backend` (`torch` by default; `cuequivariance` requires separately installed compatible extensions). These do not replace the checkpoint-bound flow/refiner sampling configuration.
 
+For multiple GPUs, use the [multi-GPU launcher](../examples/README.md#run-on-multiple-gpus) with JSON inputs and precomputed MSAs. It starts one standard sampler per GPU and distributes complete targets across them. Each process loads its own models; the original single-GPU sampler and per-target sample budget are retained.
+
 ## Outputs and timing
 
 All paths below are relative to the directory passed to `--out`.
@@ -87,4 +89,4 @@ Each `ensemble.cif` combines samples from all requested seeds. The defaults `--s
 
 Overall wall time includes local MSA search. `inference_wall_seconds_excluding_msa` starts after search and includes initialization, model forward passes, and output writing. Per-target timing excludes time spent waiting for other targets. `ensemble_seed` is nested within `ensemble_target`; do not add both when aggregating elapsed time.
 
-The runner stops on failure and preserves existing output. It requires a new output directory and does not automatically resume or overwrite runs. Existing anchors can be explicitly reused through a new input manifest.
+The runner stops on failure and preserves existing output. It requires a new output directory and does not automatically add a timestamp, resume, or overwrite runs. Existing anchors can be explicitly reused through a new input manifest. The multi-GPU launcher generates a host- and timestamp-based directory when `--out` is omitted, and gives each worker a separate output directory.
