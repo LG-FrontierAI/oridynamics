@@ -27,8 +27,9 @@ The standard `oridynamic sample` command uses one GPU. To distribute the example
 python -m oridynamic.multi_gpu \
   --input-json examples/five_cases_with_msa.json \
   --gpus 0,1,2,3 \
-  --anchor-candidates 32 \
-  --seeds 0,1,2,3 --samples-per-seed 8 --sample-chunk-size 2
+  --anchor-candidates 32 --anchor-samples-per-seed 8 \
+  --seeds 0,1,2,3 --samples-per-seed 8 \
+  --sample-chunk-size 2
 ```
 
 Each worker uses one GPU and processes complete systems, keeping all partners in a complex together. The launcher approximately balances the targets by protein residue count. Each target still receives 32 PTX candidates and 32 final samples; adding GPUs does not multiply the sample count. A single system is not split across GPUs, and GPU memory is not pooled. The five examples can use up to five workers.

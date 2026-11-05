@@ -101,7 +101,26 @@ runs/five_cases/targets/<target>/ensemble.cif
 
 Use a new output directory for each run. See the [example guide](examples/README.md) for the included systems and alignments.
 
-To run the examples across several GPUs, follow the [multi-GPU instructions](examples/README.md#run-on-multiple-gpus).
+**Run on four GPUs**
+
+Distribute the five systems across four GPUs using the same environment and resources:
+
+```bash
+python -m oridynamic.multi_gpu \
+  --input-json examples/five_cases_with_msa.json \
+  --gpus 0,1,2,3 \
+  --anchor-candidates 32 --anchor-samples-per-seed 8 \
+  --seeds 0,1,2,3 --samples-per-seed 8 \
+  --sample-chunk-size 2
+```
+
+Each system runs on one GPU and produces 32 final conformations, for 160 in total. The launcher prints a new output directory containing the host name and timestamp. Final structures are saved under:
+
+```text
+runs/multigpu_<host>_<timestamp>_<unique ID>/gpu_<index>/targets/<target>/ensemble.cif
+```
+
+Change `--gpus` to select your GPUs. Add `--plan` to preview target assignment without running inference. See the [multi-GPU guide](examples/README.md#run-on-multiple-gpus) for logs, GPU selection, and sample chunk sizes.
 
 <details>
 <summary><strong>Use your own protein sequence</strong></summary>
