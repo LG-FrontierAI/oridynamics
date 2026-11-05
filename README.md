@@ -83,44 +83,58 @@ For resources stored elsewhere, edit a copy of the [path configuration](configs/
 
 After [installation](#installation) and [resource setup](#model-resources), run the five systems shown above: **6odd_B**, **7e2s_A**, **6l3r_E**, **2K0G**, and **A00C2**. Their MSAs are included, so this example needs no MSA search tools or databases.
 
+**Single-GPU**
+
 ```bash
 oridynamic sample \
   --input-json examples/five_cases_with_msa.json \
-  --anchor-candidates 32 \
-  --seeds 0,1,2,3 --samples-per-seed 8 --sample-chunk-size 1 \
   --out runs/five_cases
 ```
 
-These are the default sampling settings: PTX generates 32 candidates using four seeds with eight samples each, then selects the top-ranked initial structure. The ensemble stage uses four seeds with eight final conformations each.
-
-**Result:** 32 final conformations per system, saved together in:
+Results are saved in:
 
 ```text
 runs/five_cases/targets/<target>/ensemble.cif
 ```
 
-You can reuse the same command: if `--out` already exists, OriDynamic automatically adds a host name, timestamp, and unique suffix, preserving earlier results. The actual output directory is printed at startup. See the [example guide](examples/README.md) for the included systems and alignments.
+If `--out` already exists, a timestamped suffix is added automatically. The actual output directory is printed at startup.
 
-**Run on four GPUs**
+**Multi-GPU**
 
-Distribute the five systems across four GPUs using the same environment and resources:
+Select your GPUs with `--gpus`, for example `0,1` or `0,2,3`:
 
 ```bash
 python -m oridynamic.multi_gpu \
   --input-json examples/five_cases_with_msa.json \
-  --gpus 0,1,2,3 \
-  --anchor-candidates 32 --anchor-samples-per-seed 8 \
-  --seeds 0,1,2,3 --samples-per-seed 8 \
-  --sample-chunk-size 2
+  --gpus 0,1,2,3
 ```
 
-Each system runs on one GPU and produces 32 final conformations, for 160 in total. The launcher prints a new output directory containing the host name and timestamp. Final structures are saved under:
+Systems are distributed across the selected GPUs, with each system staying on one GPU. Results are saved under an automatically named directory:
 
 ```text
 runs/multigpu_<host>_<timestamp>_<unique ID>/gpu_<index>/targets/<target>/ensemble.cif
 ```
 
-Change `--gpus` to select your GPUs. Add `--plan` to preview target assignment without running inference. See the [multi-GPU guide](examples/README.md#run-on-multiple-gpus) for logs, GPU selection, and sample chunk sizes.
+Both commands use the same defaults: **32 PTX candidates** (4 seeds × 8), **32 final conformations per system** (4 seeds × 8; 160 across the five examples), and a sample chunk size of **1**. Add `--plan` to preview the run. See the [example guide](examples/README.md) for GPU selection, outputs, and alignments.
+
+<details>
+<summary><strong>Custom sampling options</strong></summary>
+
+To set the GPUs, sampling budget, chunk size, and output explicitly:
+
+```bash
+python -m oridynamic.multi_gpu \
+  --input-json examples/five_cases_with_msa.json \
+  --gpus 0,2 \
+  --anchor-candidates 32 --anchor-samples-per-seed 8 \
+  --seeds 0,1,2,3 --samples-per-seed 8 \
+  --sample-chunk-size 4 \
+  --out runs/custom
+```
+
+The sampling options also work with `oridynamic sample`. Increase `--samples-per-seed` for a larger ensemble; increase `--sample-chunk-size` when GPU memory allows. GPU indices follow `CUDA_VISIBLE_DEVICES` when it is set.
+
+</details>
 
 <details>
 <summary><strong>Use your own protein sequence</strong></summary>
@@ -131,9 +145,6 @@ For your own protein sequence, provide its matching A3M alignment:
 oridynamic sample \
   --fasta protein.fasta \
   --msa-a3m protein.a3m \
-  --seeds 0,1,2,3 \
-  --samples-per-seed 8 \
-  --sample-chunk-size 1 \
   --out runs/protein
 ```
 
@@ -152,7 +163,6 @@ oridynamic sample \
   --msa-a3m protein.a3m \
   --initial-structure initial.cif \
   --structure-chain A \
-  --seeds 0,1,2,3 --samples-per-seed 8 \
   --out runs/with_structure
 ```
 
