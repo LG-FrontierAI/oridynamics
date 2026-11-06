@@ -2,7 +2,7 @@
 
 OriDynamic supports editable installation with `python -m pip install -e .` and installation from a built wheel. The public commands are `oridynamic sample`, `oridynamic msa`, and `oridynamic doctor`. See the [README](README.md) for a quick start.
 
-Use the Python 3.11 / CUDA 12.6 environment below in a dedicated environment. This package is not currently distributed through PyPI. The two OriDynamic weights are hosted on [Hugging Face](https://huggingface.co/DanielYoung0520/oridynamic_v0); the Protenix base and CCD resources are obtained from the official Protenix distribution. Set `ORIDYNAMIC_PATHS` and `ORIDYNAMIC_ASSETS`, or pass `--paths` and `--assets-root` explicitly.
+Use the Python 3.11 / CUDA 12.6 environment below in a dedicated environment. This package is not currently distributed through PyPI. The two OriDynamic weights are hosted on [Hugging Face](https://huggingface.co/LG-FrontierAI/OriDynamic); the Protenix base and CCD resources are obtained from the official Protenix distribution. Set `ORIDYNAMIC_PATHS` and `ORIDYNAMIC_ASSETS`, or pass `--paths` and `--assets-root` explicitly.
 
 Inference requires this repository, its matching inference checkpoints, CCD resources, and the appropriate MSA inputs or search resources. FASTA entries describe independent proteins; use the [complex JSON format](docs/complex_inputs.md) for protein–ligand and protein–protein systems.
 
@@ -52,7 +52,7 @@ The default Torch backend does not require compiling fused LayerNorm. The option
 
 ## 2. Model weights and CCD
 
-Download the OriDynamic autoencoder and joint weights from [Hugging Face](https://huggingface.co/DanielYoung0520/oridynamic_v0), and **Protenix base v1.0.0** plus both CCD files from the official [Protenix](https://github.com/bytedance/Protenix) distribution. The commands below download all five required files.
+Download the OriDynamic autoencoder and joint weights from [Hugging Face](https://huggingface.co/LG-FrontierAI/OriDynamic), and **Protenix base v1.0.0** plus both CCD files from the official [Protenix](https://github.com/bytedance/Protenix) distribution. The commands below download all five required files.
 
 <a id="ccd"></a>
 
@@ -78,7 +78,7 @@ python -m pip install -c requirements-inference.txt \
 python -m pip check
 
 # OriDynamic weights
-hf download DanielYoung0520/oridynamic_v0 \
+hf download LG-FrontierAI/OriDynamic \
   ae.ckpt oridynamic.ckpt \
   --local-dir weights
 

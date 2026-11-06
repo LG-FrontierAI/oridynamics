@@ -15,7 +15,7 @@
 [![Release: 0.1.0](docs/images/release.svg)](pyproject.toml)
 
 <!-- Replace #technical-report with the technical report URL when available. -->
-[🌐 Homepage](https://oridynamics.github.io/) &nbsp; · &nbsp; [📄 Technical report (coming soon)](#technical-report) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/DanielYoung0520/oridynamic_v0) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
+[🌐 Homepage](https://oridynamics.github.io/) &nbsp; · &nbsp; [📄 Technical report (coming soon)](#technical-report) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/LG-FrontierAI/OriDynamic) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
 
 </div>
 
@@ -59,8 +59,8 @@ Download the following resources before running inference:
 
 | Resource | Location |
 | :--- | :--- |
-| `ae.ckpt` — structural autoencoder | [Hugging Face](https://huggingface.co/DanielYoung0520/oridynamic_v0/tree/main) |
-| `oridynamic.ckpt` — latent flow, coordinate refiner, trunk adaptation, and latent normalization | [Hugging Face](https://huggingface.co/DanielYoung0520/oridynamic_v0/tree/main) |
+| `ae.ckpt` — structural autoencoder | [Hugging Face](https://huggingface.co/LG-FrontierAI/OriDynamic/tree/main) |
+| `oridynamic.ckpt` — latent flow, coordinate refiner, trunk adaptation, and latent normalization | [Hugging Face](https://huggingface.co/LG-FrontierAI/OriDynamic/tree/main) |
 | `protenix_base_default_v1.0.0.pt` — cofolding backbone | [Official Protenix repository](https://github.com/bytedance/Protenix) |
 | `components.cif` and `components.cif.rdkit_mol.pkl` — chemical component data | [Official Protenix repository](https://github.com/bytedance/Protenix) |
 
