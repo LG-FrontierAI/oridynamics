@@ -12,7 +12,7 @@
 <img src="docs/structures/previews/A00C2.png" alt="A00C2: protein–protein assembly" width="19%">
 </p>
 
-[![Beta release: 0.1.0b0](docs/images/release.svg)](pyproject.toml)
+[![Release: 0.1.0](docs/images/release.svg)](pyproject.toml)
 
 <!-- Replace #technical-report with the technical report URL when available. -->
 [🌐 Homepage](https://oridynamics.github.io/) &nbsp; · &nbsp; [📄 Technical report (coming soon)](#technical-report) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/DanielYoung0520/oridynamic_v0) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
@@ -38,8 +38,8 @@ The [five bundled examples](#quick-start) include matching MSAs and cover all th
 The tested inference environment uses **Linux, Python 3.11, PyTorch 2.7.1 with CUDA 12.6, and an NVIDIA GPU**.
 
 ```bash
-git clone https://github.com/JiahaoYoung0520/oridynamic_test.git
-cd oridynamic_test
+git clone https://github.com/LG-FrontierAI/OriDynamic.git
+cd OriDynamic
 
 conda create -n oridynamic python=3.11 -y
 conda activate oridynamic

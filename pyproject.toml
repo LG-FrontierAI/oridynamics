@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oridynamic-inference"
-version = "0.1.0b0"
+version = "0.1.0"
 description = "All-atom biomolecular ensemble generation with OriDynamic"
 readme = "README.md"
 license = "Apache-2.0"
@@ -12,7 +12,6 @@ license-files = ["LICENSE", "licenses/Protenix.txt", "NOTICE", "THIRD_PARTY_NOTI
 requires-python = ">=3.11,<3.12"
 dynamic = ["dependencies"]
 classifiers = [
-  "Development Status :: 4 - Beta",
   "Operating System :: POSIX :: Linux",
   "Programming Language :: Python :: 3.11",
   "Private :: Do Not Upload",
