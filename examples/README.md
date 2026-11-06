@@ -71,14 +71,18 @@ Keep the supplied sequences unchanged so that they match the bundled MSAs.
 
 ## Other MSA modes
 
-[five_cases.json](five_cases.json) contains the same systems without MSA paths. To search your own local database:
+[five_cases.json](five_cases.json) contains the same systems without MSA paths. After the separate Python environment setup in [INSTALL.md](../INSTALL.md#4-local-msa-search-with-colabfoldmmseqs2), search your own local database with:
 
 ```bash
 oridynamic sample --input-json examples/five_cases.json \
   --msa-local-db /data/colabfold_db --msa-threads 16 \
+  --msa-search-executable "$PWD/.envs/msa/bin/colabfold_search" \
+  --msa-mmseqs "$PWD/vendor/mmseqs18/mmseqs/bin/mmseqs" \
   --seeds 0,1,2,3 --samples-per-seed 8 --sample-chunk-size 1 \
   --out runs/five_cases_local_search
 ```
+
+Replace the database and executable paths if your installation uses different locations.
 
 For a small query-only installation test, use one PTX candidate and two final samples per system:
 

@@ -3,7 +3,7 @@
 set -euo pipefail
 if [[ $# -lt 3 ]]; then
   echo 'Usage: bash tools/search_msa_docker.sh FASTA DB_DIR NEW_OUT [--msa-threads 16 ...]' >&2
-  echo 'Environment: MSA_IMAGE=localcolabfold:latest (local), MSA_DEVICE=cpu|gpu, MSA_GPUS=0' >&2
+  echo 'Environment: MSA_IMAGE=ghcr.io/sokrypton/colabfold:1.6.2-cuda12, MSA_DEVICE=cpu|gpu, MSA_GPUS=0' >&2
   exit 2
 fi
 release_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)
@@ -27,7 +27,7 @@ for argument in "$@"; do
       echo "Cannot override managed path/device arguments: $argument" >&2; exit 2 ;;
   esac
 done
-image=${MSA_IMAGE:-ghcr.io/sokrypton/colabfold:1.6.3-cuda12}
+image=${MSA_IMAGE:-ghcr.io/sokrypton/colabfold:1.6.2-cuda12}
 device=${MSA_DEVICE:-cpu}
 gpu_args=()
 case "$device" in

@@ -145,8 +145,8 @@ Install the search tools and databases separately. OriDynamic calls the public C
 A separate search environment helps avoid dependency conflicts. The host can launch a search container:
 
 ```bash
-docker pull ghcr.io/sokrypton/colabfold:1.6.3-cuda12
-MSA_IMAGE=ghcr.io/sokrypton/colabfold:1.6.3-cuda12 MSA_DEVICE=gpu MSA_GPUS=0 \
+docker pull ghcr.io/sokrypton/colabfold:1.6.2-cuda12
+MSA_IMAGE=ghcr.io/sokrypton/colabfold:1.6.2-cuda12 MSA_DEVICE=gpu MSA_GPUS=0 \
   bash tools/search_msa_docker.sh input.fasta /absolute/path/colabfold_db new_search_run \
     --msa-threads 16
 ```
@@ -179,7 +179,9 @@ oridynamic msa --fasta examples/monomer.fasta --out runs/msa_check \
   --msa-mmseqs "$PWD/vendor/mmseqs18/mmseqs/bin/mmseqs" --check
 ```
 
-See the [README](README.md#msa-options) for search followed by inference in one command. Search defaults to CPU with 16 threads; GPU search must be selected explicitly with `--msa-device gpu` (the default is `--msa-device cpu`). Search completes before model loading. The wrapper does not start a persistent GPU server, search templates, or modify databases.
+Keep the inference environment activated. When using the separate Python environment above, pass the same `--msa-search-executable` and `--msa-mmseqs` paths to `oridynamic sample`; `--check` does not save these settings. The [README](README.md#msa-options) shows the complete command. Replace the executable paths if your tools are installed elsewhere.
+
+Search defaults to CPU with 16 threads; GPU search must be selected explicitly with `--msa-device gpu` (the default is `--msa-device cpu`). Search completes before model loading. The wrapper does not start a persistent GPU server, search templates, or modify databases.
 
 Database checks inspect the `dbtype` markers, rather than hashing the complete databases. The query sequence and alignment columns are validated before inference. A failed search stops the run; there is no automatic fallback to an online service or query-only input.
 

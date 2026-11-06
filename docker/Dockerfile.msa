@@ -1,5 +1,5 @@
 # 只提供搜索环境，不运行AlphaFold预测；固定公开上游版本。
-FROM ghcr.io/sokrypton/colabfold:1.6.3-cuda12
+FROM ghcr.io/sokrypton/colabfold:1.6.2-cuda12
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY oridynamic/__init__.py oridynamic/local_msa.py oridynamic/prepare.py /opt/oridynamic/oridynamic/
 ENV PYTHONPATH=/opt/oridynamic

@@ -35,17 +35,17 @@ The second target has no MSA, so supply a local database as described below.
 
 ## Local and online MSAs
 
-With the database and ColabFold/MMseqs2 tools installed, search and inference can be combined:
+With the database and ColabFold/MMseqs2 tools installed in the separate environment described in [INSTALL.md](../INSTALL.md#4-local-msa-search-with-colabfoldmmseqs2), search and inference can be combined. Run from the repository root with the inference environment activated:
 
 ```bash
 python -B -u -m oridynamic \
   --fasta sequences.fasta --msa-local-db /data/colabfold_db \
-  --msa-search-executable /opt/colabfold/bin/colabfold_search \
-  --msa-mmseqs /opt/mmseqs/bin/mmseqs --msa-threads 32 \
+  --msa-search-executable "$PWD/.envs/msa/bin/colabfold_search" \
+  --msa-mmseqs "$PWD/vendor/mmseqs18/mmseqs/bin/mmseqs" --msa-threads 32 \
   --seeds 0,1,2,3 --samples-per-seed 8 --out runs/local_batch_v1
 ```
 
-Local search defaults to CPU. Add `--msa-device gpu` to use a compatible GPU-enabled ColabFold/MMseqs2 installation; GPU visibility follows `CUDA_VISIBLE_DEVICES`.
+Replace the database and executable paths if your installation uses different locations. Local search defaults to CPU. Add `--msa-device gpu` to use a compatible GPU-enabled ColabFold/MMseqs2 installation; GPU visibility follows `CUDA_VISIBLE_DEVICES`.
 
 You can also supply `--msa-dir`: existing alignments are reused, and only missing ones are searched. The wrapper invokes the search tool separately for each protein entity; it does not guarantee a single database load. Search completes before model loading. Temporary files stay within the new run directory, and public databases are read-only. A failed search stops the run.
 

@@ -186,16 +186,20 @@ Each protein entity needs a matching MSA. Choose the option that fits your input
 <details>
 <summary><strong>Search a local MSA database</strong></summary>
 
-Install ColabFold/MMseqs2 and prepare the databases using the [MSA setup guide](INSTALL.md#4-local-msa-search-with-colabfoldmmseqs2), then run:
+Install ColabFold/MMseqs2 and prepare the databases using the [MSA setup guide](INSTALL.md#4-local-msa-search-with-colabfoldmmseqs2). For the separate Python environment described there, run from the repository root with the inference environment activated:
 
 ```bash
 oridynamic sample \
   --fasta protein.fasta \
   --msa-local-db /data/colabfold_db \
+  --msa-search-executable "$PWD/.envs/msa/bin/colabfold_search" \
+  --msa-mmseqs "$PWD/vendor/mmseqs18/mmseqs/bin/mmseqs" \
   --msa-threads 16 \
   --seeds 0,1,2,3 --samples-per-seed 8 \
   --out runs/from_sequence
 ```
+
+Replace the database and executable paths with your own locations. If you use the search container instead, pass its resulting A3M file with `--msa-a3m`.
 
 </details>
 
