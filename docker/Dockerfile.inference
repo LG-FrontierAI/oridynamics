@@ -2,11 +2,11 @@
 FROM python:3.11-slim-bookworm
 RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
     && rm -rf /var/lib/apt/lists/*
-WORKDIR /opt/oridynamic
+WORKDIR /opt/oridynamics
 COPY requirements-inference.txt ./
 RUN pip install --no-cache-dir torch==2.7.1 --index-url https://download.pytorch.org/whl/cu126 \
     && pip install --no-cache-dir -r requirements-inference.txt
-COPY oridynamic ./oridynamic
+COPY oridynamics ./oridynamics
 COPY docs ./docs
 COPY protenix ./protenix
 COPY runner ./runner
@@ -17,5 +17,5 @@ COPY LICENSE NOTICE THIRD_PARTY_NOTICES README.md INSTALL.md pyproject.toml MANI
 RUN python -m pip install --no-cache-dir "setuptools>=77" wheel \
     && python -m pip install --no-deps --no-build-isolation .
 ENV PYTHONDONTWRITEBYTECODE=1 LAYERNORM_TYPE=torch PROTENIX_DISABLE_FUSED_LN=1
-ENTRYPOINT ["python", "-B", "-u", "-m", "oridynamic"]
+ENTRYPOINT ["python", "-B", "-u", "-m", "oridynamics"]
 CMD ["--help"]

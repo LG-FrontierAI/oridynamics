@@ -48,10 +48,10 @@ docker run --rm --pull never --network none --read-only --tmpfs /tmp:rw,size=1g 
   --mount "type=bind,src=$database_path,dst=/db,readonly" \
   --mount "type=bind,src=$output_path,dst=/work" \
   --workdir /work --entrypoint /bin/bash "$image_id" -lc \
-  'cd /release && exec python3 -B -u -m oridynamic.local_msa --fasta /query.fasta --msa-local-db /db --out /work/msa "$@"' \
+  'cd /release && exec python3 -B -u -m oridynamics.local_msa --fasta /query.fasta --msa-local-db /db --out /work/msa "$@"' \
   bash --msa-device "$device" "$@"
 if [[ ! -s "$output_path/msa/unpaired.a3m" ]]; then
-  echo 'No validated A3M was produced; inference cannot start. For preflight, use oridynamic msa --check.' >&2
+  echo 'No validated A3M was produced; inference cannot start. For preflight, use oridynamics msa --check.' >&2
   exit 1
 fi
 echo "[Ready for inference] --msa-a3m $output_path/msa/unpaired.a3m"

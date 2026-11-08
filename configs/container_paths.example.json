@@ -2,6 +2,6 @@
   "checkpoints": {
     "native": "/weights/protenix_base_default_v1.0.0.pt",
     "codec": "/weights/ae.ckpt",
-    "joint": "/weights/oridynamic.ckpt"
+    "joint": "/weights/oridynamics.ckpt"
   }
 }

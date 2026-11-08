@@ -10,20 +10,20 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from oridynamic import batch_predict
-from oridynamic.cli import main
-from oridynamic.doctor import inspect
+from oridynamics import batch_predict
+from oridynamics.cli import main
+from oridynamics.doctor import inspect
 
 
 class PublicCliTests(unittest.TestCase):
     def test_help_and_version_without_torch(self):
         for command in (['--help'], ['--version'], ['sample', '--help'], ['msa', '--help']):
-            code = "from oridynamic.cli import main; import sys\ntry: main(" + repr(command) + ")\nexcept SystemExit as e: assert e.code == 0\nassert 'torch' not in sys.modules"
+            code = "from oridynamics.cli import main; import sys\ntry: main(" + repr(command) + ")\nexcept SystemExit as e: assert e.code == 0\nassert 'torch' not in sys.modules"
             subprocess.run([sys.executable, '-B', '-c', code], check=True, capture_output=True)
 
     def test_sample_alias_and_environment_precedence(self):
-        with patch.dict(os.environ, {'ORIDYNAMIC_PATHS': '/weights.json', 'ORIDYNAMIC_ASSETS': '/assets'}), \
-                patch('oridynamic.batch_predict.main') as sample:
+        with patch.dict(os.environ, {'ORIDYNAMICS_PATHS': '/weights.json', 'ORIDYNAMICS_ASSETS': '/assets'}), \
+                patch('oridynamics.batch_predict.main') as sample:
             main(['sample', '--fasta', 'a.fasta', '--out', 'run'])
             self.assertEqual(sample.call_args.args[0][-4:], ['--paths', '/weights.json', '--assets-root', '/assets'])
             main(['--fasta', 'a.fasta', '--paths=custom.json', '--out', 'run'])
@@ -53,20 +53,20 @@ class PublicCliTests(unittest.TestCase):
             self.assertEqual(list(root.iterdir()), [])
 
     def test_predict_environment_and_explicit_override(self):
-        from oridynamic.predict import main as predict
+        from oridynamics.predict import main as predict
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             fasta = root / 'input.fasta'; fasta.write_text('>test\nACDE\n')
             config = root / 'paths.json'; config.write_text('{}')
             argv = ['--fasta', str(fasta), '--single-sequence', '--check', '--out', str(root/'out')]
-            with patch.dict(os.environ, {'ORIDYNAMIC_PATHS': str(config), 'ORIDYNAMIC_ASSETS': str(root/'env_assets')}):
+            with patch.dict(os.environ, {'ORIDYNAMICS_PATHS': str(config), 'ORIDYNAMICS_ASSETS': str(root/'env_assets')}):
                 for extra, expected in [([], 'env_assets'), (['--assets-root', str(root/'cli_assets')], 'cli_assets')]:
                     error = io.StringIO()
                     with redirect_stderr(error), self.assertRaises(SystemExit) as exc:
                         predict(argv + extra)
                     self.assertEqual(exc.exception.code, 2)
                     self.assertIn(expected, error.getvalue())
-                    self.assertIn('ORIDYNAMIC_ASSETS', error.getvalue())
+                    self.assertIn('ORIDYNAMICS_ASSETS', error.getvalue())
                     self.assertFalse((root/'out').exists())
                 error = io.StringIO()
                 with redirect_stderr(error), self.assertRaises(SystemExit):
@@ -75,8 +75,8 @@ class PublicCliTests(unittest.TestCase):
 
     def test_public_help_is_english(self):
         import re
-        for module, args in [('oridynamic', ['sample', '--help']), ('oridynamic.predict', ['--help']),
-                             ('oridynamic', ['msa', '--help']), ('oridynamic', ['doctor', '--help'])]:
+        for module, args in [('oridynamics', ['sample', '--help']), ('oridynamics.predict', ['--help']),
+                             ('oridynamics', ['msa', '--help']), ('oridynamics', ['doctor', '--help'])]:
             result = subprocess.run([sys.executable, '-B', '-m', module, *args], check=True, capture_output=True, text=True)
             self.assertIsNone(re.search('[\u4e00-\u9fff]', result.stdout), module)
 

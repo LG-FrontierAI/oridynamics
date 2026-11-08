@@ -11,14 +11,14 @@ import sys
 import numpy as np
 import torch
 
-from oridynamic import inference_runtime as rt
-from oridynamic import runtime_utils as runner
-from oridynamic.inference_timing import TimingLog
-from oridynamic.prepare import file_info, seed_list
-from oridynamic.predict import select_runtime
+from oridynamics import inference_runtime as rt
+from oridynamics import runtime_utils as runner
+from oridynamics.inference_timing import TimingLog
+from oridynamics.prepare import file_info, seed_list
+from oridynamics.predict import select_runtime
 from protenix.model.protenix import Protenix, update_input_feature_dict
-from oridynamic.weights_io import load_weights
-from oridynamic.complex_inputs import native_sample, proteins
+from oridynamics.weights_io import load_weights
+from oridynamics.complex_inputs import native_sample, proteins
 
 
 def _cache_tree(value):
@@ -59,7 +59,7 @@ def unpack_atoms(value):
 def write_prepared(folder, features, atoms, identities, anchor, c0, contract):
     """只存CPU张量和基本类型；不是任意Python对象pickle，逐目标磁盘卸载O(N²)上下文。"""
     rt.require(runner.build_reference_identities(atoms) == identities, 'Cached atom identities do not match')
-    payload = _cache_tree(dict(schema='oridynamic_prepared_target_v1', contract=contract,
+    payload = _cache_tree(dict(schema='oridynamics_prepared_target_v1', contract=contract,
         features=features, atoms=pack_atoms(atoms), identities=identities, anchor=anchor, c0=c0))
     rt.fingerprints(payload)  # 拒绝自定义对象/非张量数组；不在cache中存模型或训练样本。
     path = folder / 'prepared.pt'
@@ -76,7 +76,7 @@ def read_prepared(folder, contract):
     path = folder / 'prepared.pt'
     rt.require(file_info(path) == record['payload'], 'Prepared file has changed')
     payload = torch.load(path, map_location='cpu', weights_only=True)
-    rt.require(payload['schema'] == 'oridynamic_prepared_target_v1' and payload['contract'] == contract,
+    rt.require(payload['schema'] == 'oridynamics_prepared_target_v1' and payload['contract'] == contract,
                'Prepared payload protocol mismatch')
     atoms = unpack_atoms(payload['atoms'])
     rt.require(runner.build_reference_identities(atoms) == payload['identities'], 'Cached atom identities changed')
@@ -110,9 +110,9 @@ class ResidentRuntime:
             self.saved, self.hashes = rt.load_parent(self.weights)
             self.cfg = rt.make_config(self.a, self.saved)
             self.code = {name:file_info(self.a.runtime_root / name)['sha256'] for name in (
-                'oridynamic/batch_predict.py', 'oridynamic/batch_runtime.py',
-                'oridynamic/inference_runtime.py', 'oridynamic/codec_condition.py', 'oridynamic/local_msa.py', 'oridynamic/complex_inputs.py',
-                'oridynamic/runtime_utils.py', 'protenix/model/modules/joint_ensemble.py')}
+                'oridynamics/batch_predict.py', 'oridynamics/batch_runtime.py',
+                'oridynamics/inference_runtime.py', 'oridynamics/codec_condition.py', 'oridynamics/local_msa.py', 'oridynamics/complex_inputs.py',
+                'oridynamics/runtime_utils.py', 'protenix/model/modules/joint_ensemble.py')}
         with self.timer.stage('native_model_load'):
             runner.reset_template_probe_rng(101)
             self.native = Protenix(self.cfg)

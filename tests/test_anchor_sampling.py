@@ -14,9 +14,9 @@ from torch import nn
 from ml_collections import ConfigDict
 
 from fixture_inference import _example, _tiny_config
-from oridynamic.inference_runtime import predict_anchor
-from oridynamic.inference_timing import TimingLog
-from oridynamic.batch_predict import parser
+from oridynamics.inference_runtime import predict_anchor
+from oridynamics.inference_timing import TimingLog
+from oridynamics.batch_predict import parser
 from protenix.model.generator import InferenceNoiseScheduler
 from protenix.model.modules.diffusion import DiffusionModule
 from protenix.model.protenix import Protenix

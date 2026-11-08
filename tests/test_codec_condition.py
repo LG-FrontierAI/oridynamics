@@ -7,8 +7,8 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).parent))
 from fixture_inference import fixture
-from oridynamic.codec_condition import FIXED_CONTEXT, ONLINE_CONTEXT, joint_model_class
-from oridynamic.inference_runtime import load_parent
+from oridynamics.codec_condition import FIXED_CONTEXT, ONLINE_CONTEXT, joint_model_class
+from oridynamics.inference_runtime import load_parent
 from protenix.model.modules.joint_ensemble import JointEnsembleModel
 
 
@@ -40,9 +40,9 @@ class CodecConditionTests(unittest.TestCase):
 
     def test_contract_is_explicit_and_unknown_rejected_before_hashing(self):
         self.assertIs(joint_model_class(FIXED_CONTEXT), JointEnsembleModel)
-        with patch('oridynamic.inference_runtime.load_weights', return_value={
+        with patch('oridynamics.inference_runtime.load_weights', return_value={
                 'metadata': {'condition_contract': 'unknown'}}), \
-             patch('oridynamic.inference_runtime.file_info') as info:
+             patch('oridynamics.inference_runtime.file_info') as info:
             with self.assertRaisesRegex(ValueError, 'codec'):
                 load_parent({'joint': Path('unused.pt')})
             info.assert_not_called()

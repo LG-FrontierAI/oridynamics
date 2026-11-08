@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from oridynamic.output_paths import output_directory
+from oridynamics.output_paths import output_directory
 
 
 class OutputPathTests(unittest.TestCase):
@@ -61,7 +61,7 @@ class OutputPathTests(unittest.TestCase):
             requested.mkdir()  # 模拟另一个进程抢先创建。
             collision = Path(tmp) / 'run_busy'; collision.mkdir()
             available = Path(tmp) / 'run_free'
-            with patch('oridynamic.output_paths.timestamped_output', side_effect=[collision, available]):
+            with patch('oridynamics.output_paths.timestamped_output', side_effect=[collision, available]):
                 self.assertEqual(output_directory(requested, create=True), available)
             self.assertEqual(list(requested.iterdir()), [])
             self.assertEqual(list(collision.iterdir()), [])
@@ -69,7 +69,7 @@ class OutputPathTests(unittest.TestCase):
     def test_invalid_parent_is_not_retried_as_output_collision(self):
         with tempfile.TemporaryDirectory() as tmp:
             parent = Path(tmp) / 'file'; parent.write_text('keep')
-            with patch('oridynamic.output_paths.timestamped_output') as rename, self.assertRaises(OSError):
+            with patch('oridynamics.output_paths.timestamped_output') as rename, self.assertRaises(OSError):
                 output_directory(parent / 'run', create=True)
             rename.assert_not_called()
 

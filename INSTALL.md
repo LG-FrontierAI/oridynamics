@@ -1,14 +1,14 @@
 # Installation
 
-OriDynamics supports editable installation with `python -m pip install -e .` and installation from a built wheel. The public commands are `oridynamic sample`, `oridynamic msa`, and `oridynamic doctor`. See the [README](README.md) for a quick start.
+OriDynamics supports editable installation with `python -m pip install -e .` and installation from a built wheel. The public commands are `oridynamics sample`, `oridynamics msa`, and `oridynamics doctor`. See the [README](README.md) for a quick start.
 
-Use the Python 3.11 / CUDA 12.6 environment below in a dedicated environment. This package is not currently distributed through PyPI. The two OriDynamics weights are hosted on [Hugging Face](https://huggingface.co/LG-FrontierAI/oridynamics); the Protenix base and CCD resources are obtained from the official Protenix distribution. Set `ORIDYNAMIC_PATHS` and `ORIDYNAMIC_ASSETS`, or pass `--paths` and `--assets-root` explicitly.
+Use the Python 3.11 / CUDA 12.6 environment below in a dedicated environment. This package is not currently distributed through PyPI. The two OriDynamics weights are hosted on [Hugging Face](https://huggingface.co/LG-FrontierAI/oridynamics); the Protenix base and CCD resources are obtained from the official Protenix distribution. Set `ORIDYNAMICS_PATHS` and `ORIDYNAMICS_ASSETS`, or pass `--paths` and `--assets-root` explicitly.
 
 Inference requires this repository, its matching inference checkpoints, CCD resources, and the appropriate MSA inputs or search resources. FASTA entries describe independent proteins; use the [complex JSON format](docs/complex_inputs.md) for protein–ligand and protein–protein systems.
 
 ## Batch inference
 
-From this repository, use `python -m oridynamic sample`. After installation, `oridynamic sample` is available from other working directories. See the [batch guide](docs/batch_inference.md) for existing MSAs, local search, and optional initial structures, or the [online MSA guide](docs/msa_online.md) to prepare alignments separately.
+From this repository, use `python -m oridynamics sample`. After installation, `oridynamics sample` is available from other working directories. See the [batch guide](docs/batch_inference.md) for existing MSAs, local search, and optional initial structures, or the [online MSA guide](docs/msa_online.md) to prepare alignments separately.
 
 For optional Docker use, the repository includes a [Dockerfile](docker/Dockerfile.inference) that you build locally. The commands below use that locally built image and the same CLI. A batch with existing MSAs can be run as follows:
 
@@ -17,8 +17,8 @@ mkdir batch_output
 docker run --rm --network none --gpus device=0 \
   -v /absolute/path/weights:/weights:ro -v /absolute/path/assets:/assets:ro \
   -v /absolute/path/user_inputs:/input:ro -v "$PWD/batch_output:/output" \
-  oridynamic-inference:local sample \
-  --paths /opt/oridynamic/configs/container_paths.example.json --assets-root /assets \
+  oridynamics-inference:local sample \
+  --paths /opt/oridynamics/configs/container_paths.example.json --assets-root /assets \
   --fasta /input/sequences.fasta --msa-dir /input/msas --out /output/run
 ```
 
@@ -32,12 +32,12 @@ The tested runtime uses Linux x86_64, Python 3.11, and PyTorch 2.7.1 with CUDA 1
 git clone https://github.com/LG-FrontierAI/oridynamics.git
 cd oridynamics
 
-conda create -n oridynamic python=3.11 -y
-conda activate oridynamic
+conda create -n oridynamics python=3.11 -y
+conda activate oridynamics
 
 python -m pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cu126
 python -m pip install -e .
-oridynamic --help
+oridynamics --help
 ```
 
 Keep this environment activated and run subsequent commands from the code repository root. If the code is already cloned, start with environment setup inside that checkout. The package reads its Python dependencies from `requirements-inference.txt`; the CUDA-specific Torch wheel is installed first.
@@ -45,7 +45,7 @@ Keep this environment activated and run subsequent commands from the code reposi
 To optionally build an inference image locally from the supplied Dockerfile:
 
 ```bash
-docker build -f docker/Dockerfile.inference -t oridynamic-inference:local .
+docker build -f docker/Dockerfile.inference -t oridynamics-inference:local .
 ```
 
 The default Torch backend does not require compiling fused LayerNorm. The optional cuequivariance backend requires compatible extensions and explicit selection.
@@ -79,7 +79,7 @@ python -m pip check
 
 # OriDynamics weights
 hf download LG-FrontierAI/oridynamics \
-  ae.ckpt oridynamic.ckpt \
+  ae.ckpt oridynamics.ckpt \
   --local-dir weights
 
 # Protenix base v1.0.0
@@ -109,7 +109,7 @@ After downloading the weights and both CCD files, the local resource layout is:
 weights/
   protenix_base_default_v1.0.0.pt
   ae.ckpt
-  oridynamic.ckpt
+  oridynamics.ckpt
 assets/common/
   components.cif
   components.cif.rdkit_mol.pkl
@@ -118,22 +118,22 @@ assets/common/
 Set the paths in the same shell:
 
 ```bash
-export ORIDYNAMIC_PATHS="$PWD/configs/portable_paths.example.json"
-export ORIDYNAMIC_ASSETS="$PWD/assets"
+export ORIDYNAMICS_PATHS="$PWD/configs/portable_paths.example.json"
+export ORIDYNAMICS_ASSETS="$PWD/assets"
 ```
 
-`ORIDYNAMIC_ASSETS` names the directory containing `common/`, not `common/` itself.
+`ORIDYNAMICS_ASSETS` names the directory containing `common/`, not `common/` itself.
 
 For custom locations, pass `--paths my_paths.json --assets-root /path/to/assets`. The JSON format is shown in [portable_paths.example.json](configs/portable_paths.example.json); relative checkpoint paths are resolved from the JSON file's directory.
 
 ## 3. Optional environment check
 
-After activating the environment and setting the resource paths, use `oridynamic doctor` to check installed dependencies and checkpoint/CCD paths. Add `--check-device` to query CUDA availability. This command does not load the models or run inference.
+After activating the environment and setting the resource paths, use `oridynamics doctor` to check installed dependencies and checkpoint/CCD paths. Add `--check-device` to query CUDA availability. This command does not load the models or run inference.
 
 ```bash
-oridynamic doctor
+oridynamics doctor
 # Optional CUDA availability check:
-oridynamic doctor --check-device
+oridynamics doctor --check-device
 ```
 
 Run the [bundled examples](examples/README.md) to generate your first ensembles. GPU memory use depends on system size, attention settings, and sample chunk size.
@@ -173,13 +173,13 @@ The default database prefixes are `uniref30_2302_db` and `colabfold_envdb_202108
 Check the local search configuration without searching or writing files:
 
 ```bash
-oridynamic msa --fasta examples/monomer.fasta --out runs/msa_check \
+oridynamics msa --fasta examples/monomer.fasta --out runs/msa_check \
   --msa-local-db /absolute/path/colabfold_db \
   --msa-search-executable "$PWD/.envs/msa/bin/colabfold_search" \
   --msa-mmseqs "$PWD/vendor/mmseqs18/mmseqs/bin/mmseqs" --check
 ```
 
-Keep the inference environment activated. When using the separate Python environment above, pass the same `--msa-search-executable` and `--msa-mmseqs` paths to `oridynamic sample`; `--check` does not save these settings. The [README](README.md#msa-options) shows the complete command. Replace the executable paths if your tools are installed elsewhere.
+Keep the inference environment activated. When using the separate Python environment above, pass the same `--msa-search-executable` and `--msa-mmseqs` paths to `oridynamics sample`; `--check` does not save these settings. The [README](README.md#msa-options) shows the complete command. Replace the executable paths if your tools are installed elsewhere.
 
 Search defaults to CPU with 16 threads; GPU search must be selected explicitly with `--msa-device gpu` (the default is `--msa-device cpu`). Search completes before model loading. The wrapper does not start a persistent GPU server, search templates, or modify databases.
 

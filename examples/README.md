@@ -6,10 +6,10 @@
 
 Run the commands below from the root of the code checkout.
 
-Follow [INSTALL.md](../INSTALL.md) to install the inference environment and configure `ORIDYNAMIC_PATHS` and `ORIDYNAMIC_ASSETS` for the model weights and CCD resources. MSA search tools and databases are not needed for the bundled examples.
+Follow [INSTALL.md](../INSTALL.md) to install the inference environment and configure `ORIDYNAMICS_PATHS` and `ORIDYNAMICS_ASSETS` for the model weights and CCD resources. MSA search tools and databases are not needed for the bundled examples.
 
 ```bash
-oridynamic sample \
+oridynamics sample \
   --input-json examples/five_cases_with_msa.json \
   --out runs/five_cases
 ```
@@ -25,7 +25,7 @@ For a larger ensemble, increase `--samples-per-seed`.
 Select the GPUs with `--gpus`, for example `0,1` or `0,2,3`. The launcher distributes complete systems across them:
 
 ```bash
-python -m oridynamic.multi_gpu \
+python -m oridynamics.multi_gpu \
   --input-json examples/five_cases_with_msa.json \
   --gpus 0,1,2,3
 ```
@@ -41,7 +41,7 @@ GPU indices refer to the devices exposed by `CUDA_VISIBLE_DEVICES` when it is se
 Both commands default to 32 PTX candidates (sixteen seeds × two), 32 final conformations per system (four seeds × eight), and `--sample-chunk-size 1`. To set these options and the output directory explicitly:
 
 ```bash
-python -m oridynamic.multi_gpu \
+python -m oridynamics.multi_gpu \
   --input-json examples/five_cases_with_msa.json \
   --gpus 0,2 \
   --anchor-candidates 32 --anchor-samples-per-seed 2 --anchor-seed 0 \
@@ -50,7 +50,7 @@ python -m oridynamic.multi_gpu \
   --out runs/custom
 ```
 
-The sampling options also work with `oridynamic sample`. `--sample-chunk-size` controls the number of ensemble samples processed together on each GPU. Larger values require more memory; they do not change the final sample count or PTX candidate budget. Increase it when GPU memory allows. Changing chunk size can change individual stochastic samples even with the same seeds.
+The sampling options also work with `oridynamics sample`. `--sample-chunk-size` controls the number of ensemble samples processed together on each GPU. Larger values require more memory; they do not change the final sample count or PTX candidate budget. Increase it when GPU memory allows. Changing chunk size can change individual stochastic samples even with the same seeds.
 
 ## Included alignments
 
@@ -74,7 +74,7 @@ Keep the supplied sequences unchanged so that they match the bundled MSAs.
 [five_cases.json](five_cases.json) contains the same systems without MSA paths. After the separate Python environment setup in [INSTALL.md](../INSTALL.md#4-local-msa-search-with-colabfoldmmseqs2), search your own local database with:
 
 ```bash
-oridynamic sample --input-json examples/five_cases.json \
+oridynamics sample --input-json examples/five_cases.json \
   --msa-local-db /data/colabfold_db --msa-threads 16 \
   --msa-search-executable "$PWD/.envs/msa/bin/colabfold_search" \
   --msa-mmseqs "$PWD/vendor/mmseqs18/mmseqs/bin/mmseqs" \
@@ -87,7 +87,7 @@ Replace the database and executable paths if your installation uses different lo
 For a small query-only installation test, use one PTX candidate and two final samples per system:
 
 ```bash
-oridynamic sample --input-json examples/five_cases.json --single-sequence \
+oridynamics sample --input-json examples/five_cases.json --single-sequence \
   --anchor-candidates 1 \
   --seeds 0 --samples-per-seed 2 --sample-chunk-size 1 \
   --out runs/five_cases_query_only

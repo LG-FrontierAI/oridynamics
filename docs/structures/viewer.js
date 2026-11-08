@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const byId = id => document.getElementById(id);
-  const catalog = window.ORIDYNAMIC_CASES;
+  const catalog = window.ORIDYNAMICS_CASES;
   const groups = ['gt', 'pred'];
   const viewers = [];
   const models = [[], []];
@@ -32,7 +32,7 @@
       const script = document.createElement('script');
       script.src = `data/${id}.js`;
       script.onload = () => {
-        const data = window.ORIDYNAMIC_DATA?.[id];
+        const data = window.ORIDYNAMICS_DATA?.[id];
         if (data) resolve(data); else reject(new Error('Structure data is missing.'));
       };
       script.onerror = () => { cache.delete(id); reject(new Error('Could not load this structure. Reload the page to try again.')); };
@@ -246,6 +246,6 @@
   const fromHash=() => selectCase(new URLSearchParams(location.hash.slice(1)).get('case'));
   window.addEventListener('hashchange',fromHash);
   // Expose the visible state for reproducible browser checks and inspection.
-  window.oridynamicViewer={state,viewers,models};
+  window.oridynamicsViewer={state,viewers,models};
   fromHash();
 })();

@@ -8,7 +8,7 @@ from pathlib import Path
 import platform
 import sys
 
-from oridynamic import __version__
+from oridynamics import __version__
 
 
 def inspect(paths=None, assets_root=None, check_device=False):
@@ -21,7 +21,7 @@ def inspect(paths=None, assets_root=None, check_device=False):
         try: report['packages'][package] = importlib.metadata.version(package)
         except importlib.metadata.PackageNotFoundError:
             report['packages'][package] = None; errors.append(f"Missing dependency: {package}")
-    spec = importlib.util.find_spec('oridynamic.batch_predict')
+    spec = importlib.util.find_spec('oridynamics.batch_predict')
     root = Path(spec.origin).resolve().parents[1] if spec and spec.origin else None
     report['runtime_root'] = str(root) if root else None
     if root is None: errors.append("Cannot locate the installed batch_predict entry point")
@@ -35,13 +35,13 @@ def inspect(paths=None, assets_root=None, check_device=False):
                 report['resources'][kind] = dict(path=str(weight), exists=weight.is_file())
                 if not weight.is_file(): errors.append(f"Missing {kind} checkpoint: {weight}")
         except (OSError, ValueError, KeyError, TypeError) as exc: errors.append(f"Invalid checkpoint path configuration: {exc}")
-    else: report['resources']['weights'] = 'Not checked: specify --paths or ORIDYNAMIC_PATHS'
+    else: report['resources']['weights'] = 'Not checked: specify --paths or ORIDYNAMICS_PATHS'
     if assets_root:
         for filename in ('common/components.cif', 'common/components.cif.rdkit_mol.pkl'):
             asset = Path(assets_root) / filename
             report['resources'][filename] = dict(path=str(asset.resolve()), exists=asset.is_file())
             if not asset.is_file(): errors.append(f"Missing CCD resource: {asset}")
-    else: report['resources']['ccd'] = 'Not checked: specify --assets-root or ORIDYNAMIC_ASSETS'
+    else: report['resources']['ccd'] = 'Not checked: specify --assets-root or ORIDYNAMICS_ASSETS'
     if check_device:
         try:
             import torch
@@ -56,9 +56,9 @@ def inspect(paths=None, assets_root=None, check_device=False):
 
 
 def main(argv=None):
-    p = argparse.ArgumentParser(prog='oridynamic doctor', description=__doc__)
-    p.add_argument('--paths', type=Path, default=os.environ.get('ORIDYNAMIC_PATHS'))
-    p.add_argument('--assets-root', type=Path, default=os.environ.get('ORIDYNAMIC_ASSETS'))
+    p = argparse.ArgumentParser(prog='oridynamics doctor', description=__doc__)
+    p.add_argument('--paths', type=Path, default=os.environ.get('ORIDYNAMICS_PATHS'))
+    p.add_argument('--assets-root', type=Path, default=os.environ.get('ORIDYNAMICS_ASSETS'))
     p.add_argument('--check-device', action='store_true', help='Import Torch and query CUDA explicitly; no model loading')
     a = p.parse_args(argv)
     result = inspect(a.paths, a.assets_root, a.check_device)

@@ -35,7 +35,7 @@ def configure_sample_template(model, args, contract):
 
 
 def _torch_load(path: Path) -> Any:
-    from oridynamic.weights_io import load_weights
+    from oridynamics.weights_io import load_weights
     return load_weights(path, 'codec')
 
 def _move_to_device(value: Any, device: torch.device) -> Any:
@@ -349,7 +349,7 @@ def write_cif(path, stack, ids):
     import numpy as np
     from biotite.structure.io import pdbx
     cif = pdbx.CIFFile()
-    pdbx.set_structure(cif, stack, data_block='oridynamic_legacy', include_bonds=False)
+    pdbx.set_structure(cif, stack, data_block='oridynamics_legacy', include_bonds=False)
     entities = np.array([int(i['entity_id']) + 1 for i in ids])
     cif.block['atom_site']['label_entity_id'] = np.tile(entities, len(stack))
     require(not path.exists(), f'Refusing to overwrite CIF: {path}')

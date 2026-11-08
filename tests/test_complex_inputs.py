@@ -9,10 +9,10 @@ import numpy as np
 import torch
 import biotite.structure as struc
 
-from oridynamic import batch_predict
-from oridynamic.complex_inputs import native_sample, proteins
-from oridynamic.inference_runtime import map_structure, validate_complex_features, write_coordinates
-from oridynamic.runtime_utils import build_reference_identities
+from oridynamics import batch_predict
+from oridynamics.complex_inputs import native_sample, proteins
+from oridynamics.inference_runtime import map_structure, validate_complex_features, write_coordinates
+from oridynamics.runtime_utils import build_reference_identities
 
 
 def tasks():
@@ -62,7 +62,7 @@ class ComplexInputTests(unittest.TestCase):
                 with self.assertRaises(ValueError):self.load(root,[task])
 
     def test_missing_json_relative_path_explains_base(self):
-        from oridynamic.complex_inputs import resolved_file
+        from oridynamics.complex_inputs import resolved_file
         with tempfile.TemporaryDirectory() as tmp:
             with self.assertRaisesRegex(ValueError, 'input JSON directory') as exc:
                 resolved_file('msas/missing.a3m', Path(tmp))

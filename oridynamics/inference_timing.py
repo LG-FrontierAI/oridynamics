@@ -11,7 +11,7 @@ class TimingLog:
         self.path = Path(out) / 'timing.json'
         self.started = time.perf_counter() if started is None else started
         self.sync = None
-        self.data = dict(schema='oridynamic_inference_timing_v1', status='running', stages=[],
+        self.data = dict(schema='oridynamics_inference_timing_v1', status='running', stages=[],
             device='cpu', cuda_visible_devices=os.environ.get('CUDA_VISIBLE_DEVICES'),
             timing_method='perf_counter_wall_clock_cuda_sync_at_gpu_stage_boundaries')
         self._save()

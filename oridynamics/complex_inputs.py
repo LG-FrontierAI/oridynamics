@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 import re
 
-from oridynamic.local_msa import validate_a3m
-from oridynamic.prepare import AMINO_ACIDS, file_info
+from oridynamics.local_msa import validate_a3m
+from oridynamics.prepare import AMINO_ACIDS, file_info
 
 
 def proteins(target):
@@ -40,7 +40,7 @@ def resolved_file(value, base):
 
 def load_native_targets(path, args):
     """使用PTX的name/sequences/proteinChain/ligand格式，拒绝未接入字段。"""
-    from oridynamic.batch_predict import validate_name
+    from oridynamics.batch_predict import validate_name
     rows = json.loads(Path(path).read_text())
     if not isinstance(rows, list) or not rows:
         raise ValueError('--input-json must contain a nonempty PTX task array')

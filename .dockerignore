@@ -6,8 +6,8 @@
 !requirements-inference.txt
 !pyproject.toml
 !MANIFEST.in
-!oridynamic/
-!oridynamic/**
+!oridynamics/
+!oridynamics/**
 !docs/
 !docs/**
 !protenix/

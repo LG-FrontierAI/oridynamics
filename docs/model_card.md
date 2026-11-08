@@ -8,7 +8,7 @@ OriDynamics generates all-atom conformational ensembles with a structural autoen
 | :--- | :--- |
 | `protenix_base_default_v1.0.0.pt` | Cofolding backbone and molecular features |
 | `ae.ckpt` | Structural autoencoder |
-| `oridynamic.ckpt` | Flow module, refine module, trunk LoRA, and latent normalization |
+| `oridynamics.ckpt` | Flow module, refine module, trunk LoRA, and latent normalization |
 
 Monomers, protein–ligand complexes, and protein–protein assemblies use the same released checkpoint pair. Obtain the weights and CCD resources using [INSTALL.md](../INSTALL.md#2-model-weights-and-ccd).
 

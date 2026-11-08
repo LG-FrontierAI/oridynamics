@@ -11,8 +11,8 @@ from types import SimpleNamespace
 import unittest
 from unittest import mock
 
-from oridynamic import multi_gpu
-from oridynamic.complex_inputs import load_native_targets
+from oridynamics import multi_gpu
+from oridynamics.complex_inputs import load_native_targets
 
 EXAMPLES = Path(__file__).resolve().parents[1] / 'examples'
 
@@ -79,7 +79,7 @@ class MultiGpuTests(unittest.TestCase):
                     '--gpus', '0,1', '--paths', str(weights), '--assets-root', str(root),
                     '--out', str(root / 'new_run'), '--sample-chunk-size', '2', '--plan']
             environment = dict(os.environ, CUDA_VISIBLE_DEVICES='2,3', PYTHONDONTWRITEBYTECODE='1')
-            code = 'import sys; from oridynamic.multi_gpu import main; assert main(' + repr(argv) + ") == 0; assert 'torch' not in sys.modules"
+            code = 'import sys; from oridynamics.multi_gpu import main; assert main(' + repr(argv) + ") == 0; assert 'torch' not in sys.modules"
             result = subprocess.run([sys.executable, '-B', '-c', code], cwd=multi_gpu.ROOT,
                                     env=environment, text=True, capture_output=True, check=True)
             plan = json.loads(result.stdout)

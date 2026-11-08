@@ -13,10 +13,10 @@ import subprocess
 import sys
 import time
 
-from oridynamic import batch_predict
-from oridynamic.complex_inputs import load_native_targets, native_sample
-from oridynamic.prepare import anchor_sampling_spec
-from oridynamic.output_paths import output_directory, timestamped_output
+from oridynamics import batch_predict
+from oridynamics.complex_inputs import load_native_targets, native_sample
+from oridynamics.prepare import anchor_sampling_spec
+from oridynamics.output_paths import output_directory, timestamped_output
 
 ROOT = Path(__file__).resolve().parents[1]
 OPTIONS = (
@@ -137,7 +137,7 @@ def run_workers(root, groups, options):
                 output = root / f'gpu_{gpu}'
                 log = root / 'logs' / f'gpu_{gpu}.log'
                 write_json(source, group['targets'])
-                command = [sys.executable, '-B', '-u', '-m', 'oridynamic', 'sample',
+                command = [sys.executable, '-B', '-u', '-m', 'oridynamics', 'sample',
                            '--input-json', str(source), '--out', str(output),
                            '--device', 'cuda:0', *options]
                 names = [target['name'] for target in group['targets']]

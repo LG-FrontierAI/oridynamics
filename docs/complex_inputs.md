@@ -1,6 +1,6 @@
 # Monomer, protein–ligand, and protein–protein inputs
 
-Use `oridynamic sample --input-json complex.json ...` with a Protenix task array. Each entry in `sequences` describes an entity using `proteinChain` or `ligand`. All chains and ligands within one task are processed together through structure prediction, ensemble generation, and CIF export.
+Use `oridynamics sample --input-json complex.json ...` with a Protenix task array. Each entry in `sequences` describes an entity using `proteinChain` or `ligand`. All chains and ligands within one task are processed together through structure prediction, ensemble generation, and CIF export.
 
 Multiple FASTA entries describe independent monomers. Use JSON to describe interacting chains in one complex.
 
@@ -49,4 +49,4 @@ An `anchor.cif` produced by this entry point can be reused directly. Homomeric c
 
 Without a supplied structure, Protenix predicts the entire complex from its protein and ligand inputs. The native `ranking_score` selects the anchor. The resulting `anchor.cif` and `ensemble.cif` include every chain and ligand, with identity and coordinate checks on readback.
 
-All supported input types use the same `ae.ckpt` and `oridynamic.ckpt` files. See [model and sampling settings](model_card.md).
+All supported input types use the same `ae.ckpt` and `oridynamics.ckpt` files. See [model and sampling settings](model_card.md).

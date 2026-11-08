@@ -43,12 +43,12 @@ The tested inference environment uses **Linux, Python 3.11, PyTorch 2.7.1 with C
 git clone https://github.com/LG-FrontierAI/oridynamics.git
 cd oridynamics
 
-conda create -n oridynamic python=3.11 -y
-conda activate oridynamic
+conda create -n oridynamics python=3.11 -y
+conda activate oridynamics
 
 python -m pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cu126
 python -m pip install -e .
-oridynamic --help
+oridynamics --help
 ```
 
 Run the examples below from the cloned repository. For detailed environment setup and model-resource configuration, see the [installation guide](INSTALL.md).
@@ -62,7 +62,7 @@ Download the following resources before running inference:
 | Resource | Location |
 | :--- | :--- |
 | `ae.ckpt` — structural autoencoder | [Hugging Face](https://huggingface.co/LG-FrontierAI/oridynamics/tree/main) |
-| `oridynamic.ckpt` — latent flow, coordinate refiner, trunk adaptation, and latent normalization | [Hugging Face](https://huggingface.co/LG-FrontierAI/oridynamics/tree/main) |
+| `oridynamics.ckpt` — latent flow, coordinate refiner, trunk adaptation, and latent normalization | [Hugging Face](https://huggingface.co/LG-FrontierAI/oridynamics/tree/main) |
 | `protenix_base_default_v1.0.0.pt` — cofolding backbone | [Official Protenix repository](https://github.com/bytedance/Protenix) |
 | `components.cif` and `components.cif.rdkit_mol.pkl` — chemical component data | [Official Protenix repository](https://github.com/bytedance/Protenix) |
 
@@ -73,11 +73,11 @@ Follow [Model weights and CCD](INSTALL.md#2-model-weights-and-ccd) to download t
 After downloading the resources, configure their locations from the code repository root:
 
 ```bash
-export ORIDYNAMIC_PATHS="$PWD/configs/portable_paths.example.json"
-export ORIDYNAMIC_ASSETS="$PWD/assets"
+export ORIDYNAMICS_PATHS="$PWD/configs/portable_paths.example.json"
+export ORIDYNAMICS_ASSETS="$PWD/assets"
 ```
 
-For resources stored elsewhere, edit a copy of the [path configuration](configs/portable_paths.example.json) and set `ORIDYNAMIC_PATHS` to it. Checkpoint paths are relative to that JSON; `ORIDYNAMIC_ASSETS` should point to the directory containing `common/`.
+For resources stored elsewhere, edit a copy of the [path configuration](configs/portable_paths.example.json) and set `ORIDYNAMICS_PATHS` to it. Checkpoint paths are relative to that JSON; `ORIDYNAMICS_ASSETS` should point to the directory containing `common/`.
 
 <a id="quick-start"></a>
 
@@ -88,7 +88,7 @@ After [installation](#installation) and [resource setup](#model-resources), run 
 **Single-GPU**
 
 ```bash
-oridynamic sample \
+oridynamics sample \
   --input-json examples/five_cases_with_msa.json \
   --out runs/five_cases
 ```
@@ -106,7 +106,7 @@ If `--out` already exists, a timestamped suffix is added automatically. The actu
 Select your GPUs with `--gpus`, for example `0,1` or `0,2,3`:
 
 ```bash
-python -m oridynamic.multi_gpu \
+python -m oridynamics.multi_gpu \
   --input-json examples/five_cases_with_msa.json \
   --gpus 0,1,2,3
 ```
@@ -125,7 +125,7 @@ Both commands use the same defaults: **32 PTX candidates** (16 seeds, `0–15`, 
 To set the GPUs, sampling budget, chunk size, and output explicitly:
 
 ```bash
-python -m oridynamic.multi_gpu \
+python -m oridynamics.multi_gpu \
   --input-json examples/five_cases_with_msa.json \
   --gpus 0,2 \
   --anchor-candidates 32 --anchor-samples-per-seed 2 --anchor-seed 0 \
@@ -134,7 +134,7 @@ python -m oridynamic.multi_gpu \
   --out runs/custom
 ```
 
-The sampling options also work with `oridynamic sample`. Increase `--samples-per-seed` for a larger ensemble; increase `--sample-chunk-size` when GPU memory allows. GPU indices follow `CUDA_VISIBLE_DEVICES` when it is set.
+The sampling options also work with `oridynamics sample`. Increase `--samples-per-seed` for a larger ensemble; increase `--sample-chunk-size` when GPU memory allows. GPU indices follow `CUDA_VISIBLE_DEVICES` when it is set.
 
 </details>
 
@@ -144,7 +144,7 @@ The sampling options also work with `oridynamic sample`. Increase `--samples-per
 For your own protein sequence, provide its matching A3M alignment:
 
 ```bash
-oridynamic sample \
+oridynamics sample \
   --fasta protein.fasta \
   --msa-a3m protein.a3m \
   --out runs/protein
@@ -160,7 +160,7 @@ This generates **32 conformations**: four seeds with eight samples each. Final s
 Supply a PDB or mmCIF structure to use as the initial structure:
 
 ```bash
-oridynamic sample \
+oridynamics sample \
   --fasta protein.fasta \
   --msa-a3m protein.a3m \
   --initial-structure initial.cif \
@@ -191,7 +191,7 @@ Each protein entity needs a matching MSA. Choose the option that fits your input
 Install ColabFold/MMseqs2 and prepare the databases using the [MSA setup guide](INSTALL.md#4-local-msa-search-with-colabfoldmmseqs2). For the separate Python environment described there, run from the repository root with the inference environment activated:
 
 ```bash
-oridynamic sample \
+oridynamics sample \
   --fasta protein.fasta \
   --msa-local-db /data/colabfold_db \
   --msa-search-executable "$PWD/.envs/msa/bin/colabfold_search" \
@@ -219,7 +219,7 @@ Use a multi-entry FASTA for independent proteins, or JSON to describe protein–
 Each FASTA entry is treated as a separate target. Place the corresponding alignments in `msas/<target>.a3m`:
 
 ```bash
-oridynamic sample \
+oridynamics sample \
   --fasta sequences.fasta --msa-dir msas \
   --seeds 0,1,2,3 --samples-per-seed 8 \
   --out runs/batch

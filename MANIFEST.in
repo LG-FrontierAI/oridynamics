@@ -2,12 +2,12 @@ include README.md INSTALL.md LICENSE licenses/Protenix.txt NOTICE THIRD_PARTY_NO
 include requirements-inference.txt pyproject.toml
 include configs/inference_defaults.json configs/base_diffusion_signature.json
 include configs/portable_paths.example.json configs/container_paths.example.json
-recursive-include oridynamic *.py
+recursive-include oridynamics *.py
 recursive-include protenix *.py
 recursive-include runner *.py
 recursive-include docs *.md
 prune docs/structures
-include docs/images/oridynamic-logo.png
+include docs/images/oridynamics-logo.png
 include examples/monomer.fasta examples/batch.fasta examples/five_cases.json examples/README.md
 include examples/five_cases_with_msa.json
 recursive-include examples/msas *.a3m

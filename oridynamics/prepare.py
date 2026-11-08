@@ -111,7 +111,7 @@ def build_request(args: argparse.Namespace) -> tuple[list[dict], dict]:
         anchor = {"source": "user_structure", "input": file_info(args.initial_structure),
                   "validation": "file_only_identity_and_geometry_not_checked"}
     request = {
-        "schema": "oridynamic_inference_preparation_v1",
+        "schema": "oridynamics_inference_preparation_v1",
         "status": "prepared_not_executed", "ready_for_inference": False,
         "target": name, "input": file_info(args.fasta), "sequence_length": len(sequence),
         "msa": msa, "anchor": anchor,

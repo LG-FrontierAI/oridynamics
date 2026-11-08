@@ -23,19 +23,19 @@ def main():
     import numpy as np
     import torch
     from ml_collections import ConfigDict
-    from oridynamic import batch_predict
-    from oridynamic.complex_inputs import native_sample
-    from oridynamic.inference_runtime import prepare_features, map_structure, write_coordinates, make_batch
-    from oridynamic.inference_timing import TimingLog
+    from oridynamics import batch_predict
+    from oridynamics.complex_inputs import native_sample
+    from oridynamics.inference_runtime import prepare_features, map_structure, write_coordinates, make_batch
+    from oridynamics.inference_timing import TimingLog
     from protenix.data.inference.json_to_feature import SampleDictToFeatures
-    from oridynamic.runtime_utils import reset_template_probe_rng, build_reference_identities
-    from oridynamic.predict import select_runtime
+    from oridynamics.runtime_utils import reset_template_probe_rng, build_reference_identities
+    from oridynamics.predict import select_runtime
     select_runtime(ROOT)
     args=batch_predict.parser().parse_args(['--input-json',str(a.input_json),
         '--out','unused']+(['--single-sequence'] if a.single_sequence else []))
     rows=batch_predict.load_targets(args);reports=[]
     torch.set_num_threads(1)
-    with tempfile.TemporaryDirectory(prefix='oridynamic-features-') as tmp:
+    with tempfile.TemporaryDirectory(prefix='oridynamics-features-') as tmp:
         for row in rows:
             out=Path(tmp)/row['name'];out.mkdir()
             cfg=ConfigDict(json.loads((ROOT/'configs/inference_defaults.json').read_text()))

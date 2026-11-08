@@ -14,10 +14,10 @@ import numpy as np
 import torch
 import biotite.structure as struc
 
-from oridynamic import batch_predict as cli
-from oridynamic.batch_runtime import ResidentRuntime, pack_atoms, unpack_atoms, write_prepared, read_prepared
-from oridynamic.inference_timing import TimingLog
-from oridynamic.runtime_utils import build_reference_identities
+from oridynamics import batch_predict as cli
+from oridynamics.batch_runtime import ResidentRuntime, pack_atoms, unpack_atoms, write_prepared, read_prepared
+from oridynamics.inference_timing import TimingLog
+from oridynamics.runtime_utils import build_reference_identities
 
 
 class ResidentBatchTests(unittest.TestCase):
@@ -64,7 +64,7 @@ class ResidentBatchTests(unittest.TestCase):
             root=Path(tmp);a=self.args(root)
             (root/'one.a3m').write_text('>q\nACDE\n')
             a.fasta=None;a.manifest=root/'m.json'
-            a.manifest.write_text(json.dumps(dict(schema='oridynamic_offline_batch_v1',targets=[
+            a.manifest.write_text(json.dumps(dict(schema='oridynamics_offline_batch_v1',targets=[
                 dict(name='one',sequence='ACDE',msa_a3m='one.a3m',trajectory='not_read')])) )
             row=cli.load_targets(a)[0]
             self.assertNotIn('trajectory',row)
@@ -231,7 +231,7 @@ class ResidentBatchTests(unittest.TestCase):
             try:
                 with mock.patch.dict(os.environ), mock.patch.object(cli,'run_search',side_effect=search), \
                      mock.patch.object(cli,'executable',side_effect=lambda s:s), \
-                     mock.patch('oridynamic.batch_runtime.ResidentRuntime',side_effect=build), redirect_stdout(io.StringIO()):
+                     mock.patch('oridynamics.batch_runtime.ResidentRuntime',side_effect=build), redirect_stdout(io.StringIO()):
                     cli.main(['--fasta',str(a.fasta),'--out',str(a.out),'--msa-dir',str(root),
                         '--msa-local-db',str(root/'db'),*self.fake_resources(root)])
             finally:
@@ -255,7 +255,7 @@ class ResidentBatchTests(unittest.TestCase):
             try:
                 for _ in range(2):
                     with mock.patch.dict(os.environ), mock.patch(
-                            'oridynamic.batch_runtime.ResidentRuntime', side_effect=build), redirect_stdout(io.StringIO()):
+                            'oridynamics.batch_runtime.ResidentRuntime', side_effect=build), redirect_stdout(io.StringIO()):
                         cli.main(['--fasta', str(a.fasta), '--out', str(a.out), '--single-sequence', *resources])
                     os.chdir(cwd)
                     request = json.loads((destinations[-1] / 'request.json').read_text())

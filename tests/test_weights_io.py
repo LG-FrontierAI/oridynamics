@@ -6,7 +6,7 @@ from unittest.mock import patch
 import tempfile
 import unittest
 import torch
-from oridynamic.weights_io import load_weights, validate_payload, SCHEMAS, META_KEYS, JOINT_KEYS, PROFILE
+from oridynamics.weights_io import load_weights, validate_payload, SCHEMAS, META_KEYS, JOINT_KEYS, PROFILE
 
 
 class WeightTests(unittest.TestCase):
@@ -40,7 +40,7 @@ class WeightTests(unittest.TestCase):
             validate_payload(value, 'joint')
 
     def test_official_native_requires_exact_file_hash(self):
-        from oridynamic.weights_io import native_compatibility_hash, LEGACY_NATIVE_SHA256
+        from oridynamics.weights_io import native_compatibility_hash, LEGACY_NATIVE_SHA256
         with tempfile.TemporaryDirectory() as root:
             path = Path(root) / 'official.pt'
             state = {'weight': torch.arange(6).reshape(2, 3)}
@@ -49,7 +49,7 @@ class WeightTests(unittest.TestCase):
             # An arbitrary model-only checkpoint must not bypass the export contract.
             with self.assertRaises(ValueError):
                 load_weights(path, 'native')
-            with patch('oridynamic.weights_io.OFFICIAL_NATIVE_SHA256', digest):
+            with patch('oridynamics.weights_io.OFFICIAL_NATIVE_SHA256', digest):
                 got = load_weights(path, 'native')
                 self.assertEqual(got['source_sha256'], digest)
                 torch.testing.assert_close(got['model']['weight'], state['weight'], rtol=0, atol=0)
@@ -62,7 +62,7 @@ class WeightTests(unittest.TestCase):
     def test_all_direct_torch_load_calls_are_restricted(self):
         root = Path(__file__).resolve().parents[1]
         count = 0
-        for directory in ('oridynamic', 'protenix', 'runner'):
+        for directory in ('oridynamics', 'protenix', 'runner'):
             for path in (root / directory).rglob('*.py'):
                 for node in ast.walk(ast.parse(path.read_text())):
                     if isinstance(node, ast.Call) and ast.unparse(node.func) in ('torch.load', 'torch.serialization.load'):

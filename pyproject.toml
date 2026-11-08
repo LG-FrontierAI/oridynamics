@@ -3,7 +3,7 @@ requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "oridynamic-inference"
+name = "oridynamics-inference"
 version = "0.1.0"
 description = "OriDynamics: Towards a World Model for Biomolecular Dynamics"
 readme = "README.md"
@@ -18,7 +18,7 @@ classifiers = [
 ]
 
 [project.scripts]
-oridynamic = "oridynamic.cli:main"
+oridynamics = "oridynamics.cli:main"
 
 [tool.setuptools]
 include-package-data = false
@@ -28,7 +28,7 @@ dependencies = {file = ["requirements-inference.txt"]}
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["oridynamic*", "protenix*", "configs", "runner"]
+include = ["oridynamics*", "protenix*", "configs", "runner"]
 exclude = ["tests*", "tools*", "runs*", "inputs*", "weights*", "assets*"]
 
 [tool.setuptools.package-data]

@@ -3,6 +3,7 @@ import hashlib
 from pathlib import Path
 import torch
 
+# 已发布权重使用固定内部格式标识；公开名称改变时仍须保持兼容。
 SCHEMAS = {k: f'oridynamic_{k}_inference_v1' for k in ('native', 'codec', 'joint')}
 TOP_KEYS = {
     'native': {'schema_version', 'source_sha256', 'model'},

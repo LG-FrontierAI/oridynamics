@@ -4,10 +4,10 @@ FASTA and request manifests describe independent protein targets. Use `--input-j
 
 ## Inputs and execution
 
-Complete the [installation and resource setup](../INSTALL.md) first. Run from the code checkout with the environment activated and `ORIDYNAMIC_PATHS` / `ORIDYNAMIC_ASSETS` set:
+Complete the [installation and resource setup](../INSTALL.md) first. Run from the code checkout with the environment activated and `ORIDYNAMICS_PATHS` / `ORIDYNAMICS_ASSETS` set:
 
 ```bash
-python -B -u -m oridynamic \
+python -B -u -m oridynamics \
   --fasta sequences.fasta --msa-dir msas \
   --seeds 0,1,2,3 --samples-per-seed 8 --sample-chunk-size 1 \
   --out runs/batch_v1
@@ -21,7 +21,7 @@ Use `--manifest request.json` to specify custom paths and chain IDs. Relative pa
 
 ```json
 {
-  "schema": "oridynamic_batch_request_v1",
+  "schema": "oridynamics_batch_request_v1",
   "targets": [
     {"name": "protein_a", "sequence": "ACDEFG", "msa_a3m": "msas/a.a3m"},
     {"name": "protein_b", "sequence": "ACDEFGH", "initial_structure": "anchors/b.cif", "structure_chain": "A"}
@@ -38,7 +38,7 @@ The second target has no MSA, so supply a local database as described below.
 With the database and ColabFold/MMseqs2 tools installed in the separate environment described in [INSTALL.md](../INSTALL.md#4-local-msa-search-with-colabfoldmmseqs2), search and inference can be combined. Run from the repository root with the inference environment activated:
 
 ```bash
-python -B -u -m oridynamic \
+python -B -u -m oridynamics \
   --fasta sequences.fasta --msa-local-db /data/colabfold_db \
   --msa-search-executable "$PWD/.envs/msa/bin/colabfold_search" \
   --msa-mmseqs "$PWD/vendor/mmseqs18/mmseqs/bin/mmseqs" --msa-threads 32 \

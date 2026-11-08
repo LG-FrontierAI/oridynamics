@@ -3,12 +3,12 @@ import argparse
 import os
 import sys
 
-from oridynamic import __version__
+from oridynamics import __version__
 
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
-    p = argparse.ArgumentParser(prog="oridynamic", description="OriDynamics: Towards a World Model for Biomolecular Dynamics")
+    p = argparse.ArgumentParser(prog="oridynamics", description="OriDynamics: Towards a World Model for Biomolecular Dynamics")
     p.add_argument("--version", action="version", version=__version__)
     p.add_argument("command", nargs="?", choices=("sample", "msa", "doctor"),
                    help="sample: generate ensembles; msa: local MSA search; doctor: read-only environment/resource checks")
@@ -16,26 +16,26 @@ def main(argv=None):
         p.parse_args(argv)
         if not argv: p.print_help()
         return 0
-    # 保留python -m oridynamic --fasta ...旧调用，不改变其默认采样配置。
+    # 保留python -m oridynamics --fasta ...旧调用，不改变其默认采样配置。
     command = "sample" if argv[0].startswith("-") else argv.pop(0)
     if command == "sample":
-        from oridynamic.batch_predict import main as sample
-        for flag, variable in (("--paths", "ORIDYNAMIC_PATHS"), ("--assets-root", "ORIDYNAMIC_ASSETS")):
+        from oridynamics.batch_predict import main as sample
+        for flag, variable in (("--paths", "ORIDYNAMICS_PATHS"), ("--assets-root", "ORIDYNAMICS_ASSETS")):
             if not any(v == flag or v.startswith(flag + "=") for v in argv) and os.environ.get(variable):
                 argv.extend((flag, os.environ[variable]))
         sample(argv)
         return 0
     if command == "msa":
-        from oridynamic.local_msa import main as search
+        from oridynamics.local_msa import main as search
         previous = sys.argv
         try:
-            sys.argv = ["oridynamic msa", *argv]
+            sys.argv = ["oridynamics msa", *argv]
             search()
         finally:
             sys.argv = previous
         return 0
     if command == "doctor":
-        from oridynamic.doctor import main as doctor
+        from oridynamics.doctor import main as doctor
         return doctor(argv)
     p.error(f"Unknown command: {command}")
 

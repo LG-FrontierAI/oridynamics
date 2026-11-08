@@ -9,19 +9,19 @@ from pathlib import Path
 import sys
 import time
 
-from oridynamic.prepare import (DEFAULT_SEEDS, DEFAULT_SAMPLES_PER_SEED,
+from oridynamics.prepare import (DEFAULT_SEEDS, DEFAULT_SAMPLES_PER_SEED,
                                DEFAULT_ANCHOR_CANDIDATES, DEFAULT_ANCHOR_SAMPLES_PER_SEED, DEFAULT_ANCHOR_SEED,
                                anchor_sampling_spec, build_request, file_info)
-from oridynamic.local_msa import add_arguments, attach_local_msa, preflight, validate_modes
-from oridynamic.inference_timing import TimingLog
-from oridynamic.output_paths import output_directory
+from oridynamics.local_msa import add_arguments, attach_local_msa, preflight, validate_modes
+from oridynamics.inference_timing import TimingLog
+from oridynamics.output_paths import output_directory
 
 
 def select_runtime(root: Path) -> Path:
     root = root.resolve(strict=True)
     if root != Path(__file__).resolve().parents[1]:
         raise ValueError("This release uses its own runtime; runtime-root cannot point to another repository")
-    for name in ("oridynamic/runtime_utils.py", "protenix/model/modules/joint_ensemble.py"):
+    for name in ("oridynamics/runtime_utils.py", "protenix/model/modules/joint_ensemble.py"):
         if not (root / name).is_file():
             raise ValueError(f"Runtime code is missing: {root / name}")
     for name, module in list(sys.modules.items()):
@@ -40,9 +40,9 @@ def main(argv=None):
     p.add_argument("--fasta", type=Path, required=True, help="One protein sequence")
     p.add_argument("--name", help="Target name; defaults to the FASTA header")
     p.add_argument("--out", type=Path, required=True, help="Output directory; if it exists, append a host/timestamp suffix automatically")
-    p.add_argument("--paths", type=Path, default=os.environ.get("ORIDYNAMIC_PATHS") or here / "configs/portable_paths.example.json", help="Read-only checkpoint path JSON; paths are relative to that JSON file")
+    p.add_argument("--paths", type=Path, default=os.environ.get("ORIDYNAMICS_PATHS") or here / "configs/portable_paths.example.json", help="Read-only checkpoint path JSON; paths are relative to that JSON file")
     p.add_argument("--runtime-root", type=Path, help="Legacy option; only this release directory is accepted")
-    p.add_argument("--assets-root", type=Path, default=os.environ.get("ORIDYNAMIC_ASSETS") or here / "assets", help="Read-only native PTX CCD resource root")
+    p.add_argument("--assets-root", type=Path, default=os.environ.get("ORIDYNAMICS_ASSETS") or here / "assets", help="Read-only native PTX CCD resource root")
     p.add_argument("--seeds", default=DEFAULT_SEEDS, help="Comma-separated generation seeds (default: 0,1,2,3)")
     p.add_argument("--samples-per-seed", type=int, default=DEFAULT_SAMPLES_PER_SEED, help="Final conformation count per seed (default: 8)")
     p.add_argument("--sample-chunk-size", type=int, default=1, help="Generation chunk size; does not change the total sample count")
@@ -81,7 +81,7 @@ def main(argv=None):
             request["msa"] = {"mode": "local", "server_used": False, "status": "pending"}
         if "X" in native_input[0]["sequences"][0]["proteinChain"]["sequence"]:
             raise ValueError("All-atom inference requires the 20 standard amino acids; X is not accepted")
-        request.update(schema="oridynamic_sequence_request_v1", status="cpu_check" if a.check else "submitted",
+        request.update(schema="oridynamics_sequence_request_v1", status="cpu_check" if a.check else "submitted",
                        pending=["See completion.json or failure.json for execution status"],
                        sampling_protocol="checkpoint_bound_joint_SDE20_and_native_anchor_SDE200")
         request.pop("ready_for_inference", None)
@@ -92,7 +92,7 @@ def main(argv=None):
         if paths.get("runtime_source_root"):
             select_runtime(Path(paths["runtime_source_root"]))
         if not a.assets_root.is_dir():
-            raise ValueError(f"CCD resource directory not found: {a.assets_root}. Set ORIDYNAMIC_ASSETS or --assets-root; see INSTALL.md.")
+            raise ValueError(f"CCD resource directory not found: {a.assets_root}. Set ORIDYNAMICS_ASSETS or --assets-root; see INSTALL.md.")
         a.assets_root = a.assets_root.resolve()
         def weight_path(value):
             path = Path(value)
@@ -121,7 +121,7 @@ def main(argv=None):
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
     os.chdir(a.out)  # 原生相对路径缓存也限定在当前新任务，不写源码或共享资源目录。
     # 搜索发生在Torch/PTX导入和模型加载之前；失败不会静默改成在线或query-only。
-    from oridynamic.local_msa import write_json
+    from oridynamics.local_msa import write_json
     write_json(a.out / "request.json", request)
     a.timing = TimingLog(a.out, started)
     try:
@@ -130,7 +130,7 @@ def main(argv=None):
                 attach_local_msa(a, native_input, request)
                 write_json(a.out / "request.json", request)
         with a.timing.stage('runtime_import'):
-            from oridynamic import inference_runtime as runtime
+            from oridynamics import inference_runtime as runtime
         result = runtime.run(a, paths, weights, native_input)
         result['timing_file'] = 'timing.json'
         a.timing.finish('cpu_check_complete' if a.check else 'inference_complete',

@@ -15,7 +15,7 @@ Copy the alignments to the inference machine and check that each query sequence 
 Run inference locally:
 
 ```bash
-python -B -u -m oridynamic --manifest request.json \
+python -B -u -m oridynamics --manifest request.json \
   --seeds 0,1,2,3 --samples-per-seed 8 --out runs/from_online_msas_v1
 ```
 

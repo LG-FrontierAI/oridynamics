@@ -14,18 +14,18 @@ from types import SimpleNamespace
 import numpy as np
 import torch
 
-from oridynamic.prepare import file_info
-from oridynamic.weights_io import load_weights, PROFILE, native_compatibility_hash
-from oridynamic.codec_condition import joint_model_class
+from oridynamics.prepare import file_info
+from oridynamics.weights_io import load_weights, PROFILE, native_compatibility_hash
+from oridynamics.codec_condition import joint_model_class
 
 
 def save_json(path, value):
-    from oridynamic.runtime_utils import atomic_json
+    from oridynamics.runtime_utils import atomic_json
     atomic_json(Path(path), value)
 
 
 def move(value, device):
-    from oridynamic.runtime_utils import _move_to_device
+    from oridynamics.runtime_utils import _move_to_device
     return _move_to_device(value, torch.device(device))
 
 
@@ -80,7 +80,7 @@ def load_parent(weights):
 
 def make_config(args, saved):
     from ml_collections import ConfigDict
-    from oridynamic.runtime_utils import _stable_json_sha256
+    from oridynamics.runtime_utils import _stable_json_sha256
     config_dir = Path(__file__).resolve().parents[1] / "configs"
     cfg = ConfigDict(json.loads((config_dir / "inference_defaults.json").read_text()))
     # 导出时核验原始配置；资源包只保留明确的推理profile，不携带训练命令。
@@ -119,8 +119,8 @@ def make_config(args, saved):
 def prepare_features(args, cfg, native_input):
     from runner.msa_search import update_infer_json
     from protenix.data.inference.infer_dataloader import InferenceDataset
-    from oridynamic import runtime_utils as runner
-    from oridynamic.runtime_utils import build_reference_identities
+    from oridynamics import runtime_utils as runner
+    from oridynamics.runtime_utils import build_reference_identities
     native_input = copy.deepcopy(native_input)
     require(len(native_input) == 1, 'Each feature-processing call requires one complete system')
     protein_entities = [e['proteinChain'] for e in native_input[0]['sequences'] if 'proteinChain' in e]
@@ -262,8 +262,8 @@ def choose_anchor(coordinates, scores, n_atoms=None):
 
 def predict_anchor(native, features, args, n_atoms):
     """复用原生多样本入口：每个seed只算一次trunk，默认十六组各两个候选。"""
-    from oridynamic.prepare import anchor_sampling_spec
-    from oridynamic import runtime_utils as runner
+    from oridynamics.prepare import anchor_sampling_spec
+    from oridynamics import runtime_utils as runner
     spec = anchor_sampling_spec(args.anchor_seed, args.anchor_candidates, args.anchor_samples_per_seed)
     require(native.N_model_seed == 1, "PTX model seeds are managed by the anchor sampling groups")
     original_samples = native.configs.sample_diffusion.N_sample
@@ -293,7 +293,7 @@ def predict_anchor(native, features, args, n_atoms):
 
 def make_batch(features, anchor, context):
     from protenix.model.coordinate_frame import canonicalize_batch
-    from oridynamic.runtime_utils import reference_token_centroids
+    from oridynamics.runtime_utils import reference_token_centroids
     require(anchor.shape == (len(features["atom_to_token_idx"]), 3), "Anchor atom axes differ")
     mask = torch.ones(len(anchor), dtype=torch.bool, device=anchor.device)
     teacher = dict(reference_coordinate=anchor, coordinate_mask=mask, reference_coordinate_mask=mask,
@@ -307,10 +307,10 @@ def make_batch(features, anchor, context):
 
 
 def build_joint(args, saved, cfg, native, weights):
-    from oridynamic import runtime_utils as runner
+    from oridynamics import runtime_utils as runner
     from protenix.model.lora import inject_lora
     from protenix.model.modules.joint_ensemble import JointConfig, JointEnsembleModel
-    from oridynamic.runtime_utils import load_vae_checkpoint, _build_denoiser
+    from oridynamics.runtime_utils import load_vae_checkpoint, _build_denoiser
     meta = saved["metadata"]
     diffusion_trainable = {n for n, p in native.diffusion_module.named_parameters() if p.requires_grad}
     native.requires_grad_(False)
@@ -344,7 +344,7 @@ def build_joint(args, saved, cfg, native, weights):
 
 def write_coordinates(path, atoms, identities, coordinates):
     import biotite.structure as struc
-    from oridynamic.runtime_utils import write_cif
+    from oridynamics.runtime_utils import write_cif
     values = coordinates.detach().cpu().float().numpy()
     require(values.ndim == 3 and values.shape[1:] == (len(atoms), 3) and np.isfinite(values).all(), "Invalid output coordinates")
     stack = struc.stack([atoms.copy() for _ in range(len(values))])
@@ -355,9 +355,9 @@ def write_coordinates(path, atoms, identities, coordinates):
 
 
 def run(args, paths, weights, native_input):
-    from oridynamic import runtime_utils as runner
+    from oridynamics import runtime_utils as runner
     from protenix.model.protenix import Protenix, update_input_feature_dict
-    from oridynamic.predict import select_runtime
+    from oridynamics.predict import select_runtime
     select_runtime(args.runtime_root)  # 再验已导入模块的真实来源。
     torch.set_num_threads(1)
     torch.backends.cuda.matmul.allow_tf32 = False
@@ -388,7 +388,7 @@ def run(args, paths, weights, native_input):
     if args.initial_structure:
         with timer.stage('user_anchor_map'):
             user_anchor = map_structure(args.initial_structure, atoms, args.structure_chain)
-    report = dict(schema="oridynamic_sequence_inference_v1", joint_step=int(saved["step"]),
+    report = dict(schema="oridynamics_sequence_inference_v1", joint_step=int(saved["step"]),
         condition_contract=saved["metadata"]["condition_contract"],
         checkpoint_sha256=hashes, runtime_root=str(args.runtime_root), n_atoms=len(atoms),
         n_tokens=len(features_cpu["token_index"]), msa_mode="local" if getattr(args, "msa_local_db", None) else "single_sequence" if args.single_sequence else "provided" if args.msa_a3m else "server",
@@ -404,7 +404,7 @@ def run(args, paths, weights, native_input):
         input_identity=identities, torch_version=torch.__version__, sampler="sde_eta10",
         initial_structure=None if args.initial_structure is None else file_info(args.initial_structure),
         code_sha256={name:file_info(args.runtime_root/name)["sha256"] for name in (
-            "oridynamic/runtime_utils.py", "oridynamic/codec_condition.py", "protenix/model/modules/joint_ensemble.py",
+            "oridynamics/runtime_utils.py", "oridynamics/codec_condition.py", "protenix/model/modules/joint_ensemble.py",
             "protenix/data/inference/infer_dataloader.py", "runner/msa_search.py")},
         entry_sha256={name:file_info(Path(__file__).parent/name)["sha256"]
                       for name in ("predict.py", "inference_runtime.py", "prepare.py", "local_msa.py", "weights_io.py", "inference_timing.py")})

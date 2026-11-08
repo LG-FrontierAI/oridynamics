@@ -19,7 +19,7 @@ def copy_source(destination):
                  'pyproject.toml', 'MANIFEST.in'):
         (destination / name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / name, destination / name)
-    trees = {'oridynamic': {'.py'}, 'protenix': {'.py'}, 'runner': {'.py'},
+    trees = {'oridynamics': {'.py'}, 'protenix': {'.py'}, 'runner': {'.py'},
              'configs': {'.py', '.json'}, 'docs': {'.md', '.png'}}
     files = []
     for directory, suffixes in trees.items():
@@ -41,7 +41,7 @@ def run(command, cwd):
 
 
 def main():
-    with tempfile.TemporaryDirectory(prefix='oridynamic-package-') as tmp:
+    with tempfile.TemporaryDirectory(prefix='oridynamics-package-') as tmp:
         tmp = Path(tmp); source = tmp / 'source'; wheels = tmp / 'wheels'
         copy_source(source)
         run([sys.executable, '-m', 'pip', 'wheel', '--no-deps', '--no-build-isolation', '--no-index',
@@ -49,7 +49,7 @@ def main():
         wheel, = wheels.glob('*.whl')
         with zipfile.ZipFile(wheel) as archive:
             names = archive.namelist()
-        for required in ('oridynamic/cli.py', 'oridynamic/batch_runtime.py', 'oridynamic/complex_inputs.py', 'configs/inference_defaults.json',
+        for required in ('oridynamics/cli.py', 'oridynamics/batch_runtime.py', 'oridynamics/complex_inputs.py', 'configs/inference_defaults.json',
                          'configs/base_diffusion_signature.json', 'protenix/model/modules/joint_ensemble.py'):
             assert required in names, required
         for license_name in ('LICENSE', 'licenses/Protenix.txt', 'NOTICE', 'THIRD_PARTY_NOTICES'):
@@ -63,7 +63,7 @@ def main():
         assert not any(set(p) & {'runs', 'inputs', 'weights', 'assets', 'datasets'} for p in parts)
         assert sum(tuple(p[:2]) == ('examples', 'msas') and p[-1].endswith('.a3m') for p in parts) == 6
         assert ('examples', 'five_cases_with_msa.json') in [tuple(p) for p in parts]
-        assert ('docs', 'images', 'oridynamic-logo.png') in [tuple(p) for p in parts]
+        assert ('docs', 'images', 'oridynamics-logo.png') in [tuple(p) for p in parts]
         env = tmp / 'env'
         venv.EnvBuilder(with_pip=True, system_site_packages=True).create(env)
         python = str(env / 'bin/python')
@@ -71,17 +71,17 @@ def main():
         code = '''
 from pathlib import Path
 import sys
-import oridynamic, configs, protenix, runner
-from oridynamic import batch_predict, inference_runtime, batch_runtime, complex_inputs
-for module in (oridynamic, batch_predict, inference_runtime, batch_runtime, complex_inputs, configs, protenix, runner):
+import oridynamics, configs, protenix, runner
+from oridynamics import batch_predict, inference_runtime, batch_runtime, complex_inputs
+for module in (oridynamics, batch_predict, inference_runtime, batch_runtime, complex_inputs, configs, protenix, runner):
     assert Path(module.__file__).resolve().is_relative_to(Path(sys.prefix)), module.__file__
 assert (Path(inference_runtime.__file__).parents[1]/'configs/inference_defaults.json').is_file()
 print('[PASS] 已安装wheel实际导入，无源码目录或研究仓库回退')
 '''
         run([python, '-I', '-B', '-c', code], tmp)
-        run([str(env / 'bin/oridynamic'), '--help'], tmp)
-        run([str(env / 'bin/oridynamic'), 'sample', '--help'], tmp)
-        run([str(env / 'bin/oridynamic'), 'doctor'], tmp)
+        run([str(env / 'bin/oridynamics'), '--help'], tmp)
+        run([str(env / 'bin/oridynamics'), 'sample', '--help'], tmp)
+        run([str(env / 'bin/oridynamics'), 'doctor'], tmp)
         # discover只将tests目录加入路径，生产模块必须来自已安装wheel。
         run([python, '-I', '-B', '-m', 'unittest', 'discover', '-s', str(ROOT / 'tests'), '-q'], tmp)
         print(json.dumps(dict(status='pass', wheel_files=len(names), source_and_wheel_private_data=False,

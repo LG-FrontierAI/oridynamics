@@ -12,7 +12,7 @@ import signal
 import subprocess
 import time
 
-from oridynamic.prepare import AMINO_ACIDS, fasta_records, file_info
+from oridynamics.prepare import AMINO_ACIDS, fasta_records, file_info
 
 
 def add_arguments(parser):
@@ -29,7 +29,7 @@ def validate_modes(args):
     if sum(bool(x) for x in (args.msa_a3m, args.single_sequence, args.msa_local_db)) > 1:
         raise ValueError("Choose only one of --msa-a3m, --single-sequence, or --msa-local-db")
     if args.check and not (args.msa_a3m or args.single_sequence):
-        raise ValueError("predict --check does not search; run oridynamic msa first and supply --msa-a3m")
+        raise ValueError("predict --check does not search; run oridynamics msa first and supply --msa-a3m")
 
 
 def query_sequence(fasta):
@@ -83,7 +83,7 @@ def preflight(args):
     threads = min(args.msa_threads, len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else os.cpu_count() or 1)
     search = executable(args.msa_search_executable)
     mmseqs = executable(args.msa_mmseqs)
-    return dict(schema="oridynamic_local_msa_v1", status="preflight_not_searched",
+    return dict(schema="oridynamics_local_msa_v1", status="preflight_not_searched",
                 query=file_info(args.fasta), sequence=sequence, database_root=str(database),
                 databases=db_info, database_hash_scope="dbtype_only_not_full_database",
                 executables={"colabfold_search": file_info(Path(search)), "mmseqs": file_info(Path(mmseqs))},

@@ -294,4 +294,4 @@ class RequestParser(object):
         return msa_res_subdirs
 
     def launch(self) -> None:
-        raise RuntimeError("The upstream inference launcher is not included. Use oridynamic sample; see INSTALL.md.")
+        raise RuntimeError("The upstream inference launcher is not included. Use oridynamics sample; see INSTALL.md.")
