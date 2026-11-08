@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/oridynamic-logo.png" alt="OriDynamic" width="380">
+<img src="docs/images/oridynamics-logo.png" alt="OriDynamics" width="380">
 
 <img src="docs/images/slogan.svg" alt="Understanding biomolecular dynamics is a key step toward biological intelligence." width="760">
 
@@ -15,13 +15,15 @@
 [![Release: 0.1.0](docs/images/release.svg)](pyproject.toml)
 
 <!-- Replace #technical-report with the technical report URL when available. -->
-[🌐 Homepage](https://oridynamics.github.io/) &nbsp; · &nbsp; [📄 Technical report (coming soon)](#technical-report) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/LG-FrontierAI/OriDynamic) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
+[🌐 Homepage](https://oridynamics.github.io/) &nbsp; · &nbsp; [📄 Technical report (coming soon)](#technical-report) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/LG-FrontierAI/oridynamics) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
 
 </div>
 
 <a id="technical-report"></a>
 
-OriDynamic generates all-atom conformational ensembles for protein monomers, protein–ligand complexes, and protein–protein assemblies. Provide molecular sequences and composition, together with matching MSAs or a local MSA database. An initial structure is optional; when omitted, the cofolding backbone predicts one before ensemble generation.
+**OriDynamics: Towards a World Model for Biomolecular Dynamics**
+
+OriDynamics generates all-atom conformational ensembles for protein monomers, protein–ligand complexes, and protein–protein assemblies. Provide molecular sequences and composition, together with matching MSAs or a local MSA database. An initial structure is optional; when omitted, the cofolding backbone predicts one before ensemble generation.
 
 | System | Molecular input |
 | :--- | :--- |
@@ -38,8 +40,8 @@ The [five bundled examples](#quick-start) include matching MSAs and cover all th
 The tested inference environment uses **Linux, Python 3.11, PyTorch 2.7.1 with CUDA 12.6, and an NVIDIA GPU**.
 
 ```bash
-git clone https://github.com/LG-FrontierAI/OriDynamic.git
-cd OriDynamic
+git clone https://github.com/LG-FrontierAI/oridynamics.git
+cd oridynamics
 
 conda create -n oridynamic python=3.11 -y
 conda activate oridynamic
@@ -59,8 +61,8 @@ Download the following resources before running inference:
 
 | Resource | Location |
 | :--- | :--- |
-| `ae.ckpt` — structural autoencoder | [Hugging Face](https://huggingface.co/LG-FrontierAI/OriDynamic/tree/main) |
-| `oridynamic.ckpt` — latent flow, coordinate refiner, trunk adaptation, and latent normalization | [Hugging Face](https://huggingface.co/LG-FrontierAI/OriDynamic/tree/main) |
+| `ae.ckpt` — structural autoencoder | [Hugging Face](https://huggingface.co/LG-FrontierAI/oridynamics/tree/main) |
+| `oridynamic.ckpt` — latent flow, coordinate refiner, trunk adaptation, and latent normalization | [Hugging Face](https://huggingface.co/LG-FrontierAI/oridynamics/tree/main) |
 | `protenix_base_default_v1.0.0.pt` — cofolding backbone | [Official Protenix repository](https://github.com/bytedance/Protenix) |
 | `components.cif` and `components.cif.rdkit_mol.pkl` — chemical component data | [Official Protenix repository](https://github.com/bytedance/Protenix) |
 
@@ -242,4 +244,4 @@ Optional initial structures can be supplied with `--structure-dir anchors`, usin
 
 ---
 
-Copyright 2026 LGLab Frontier AI Group. OriDynamic inference code is licensed under [Apache-2.0](LICENSE). See [NOTICE](NOTICE) for upstream attribution; third-party resources retain their respective terms.
+Copyright 2026 LGLab Frontier AI Group. OriDynamics inference code is licensed under [Apache-2.0](LICENSE). See [NOTICE](NOTICE) for upstream attribution; third-party resources retain their respective terms.

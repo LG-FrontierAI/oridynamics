@@ -8,7 +8,7 @@ Follow the [ColabFold instructions](https://github.com/sokrypton/ColabFold#gener
 colabfold_batch sequences.fasta online_msas --msa-only
 ```
 
-This command generates MSAs only. It does not invoke OriDynamic or predict an initial structure. Follow the service's usage terms and rate limits. The official Colab interface can also be used to obtain A3M files.
+This command generates MSAs only. It does not invoke OriDynamics or predict an initial structure. Follow the service's usage terms and rate limits. The official Colab interface can also be used to obtain A3M files.
 
 Copy the alignments to the inference machine and check that each query sequence matches its FASTA input exactly. If alignment filenames differ from the first words of the FASTA headers, specify their `msa_a3m` paths explicitly in a [request manifest](batch_inference.md#inputs-and-execution).
 

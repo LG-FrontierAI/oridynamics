@@ -1,4 +1,4 @@
-# 仅发布目录；不克隆或安装其他OriDynamic/PTX仓库，不包含权重/CCD/MSA库。
+# 仅发布目录；不克隆或安装其他OriDynamics/PTX仓库，不包含权重/CCD/MSA库。
 FROM python:3.11-slim-bookworm
 RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
     && rm -rf /var/lib/apt/lists/*

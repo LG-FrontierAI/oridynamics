@@ -2,7 +2,7 @@
 
 ## Model components
 
-OriDynamic generates all-atom conformational ensembles with a structural autoencoder, a latent flow module, and a coordinate refine module. The flow module samples token-level latents, the decoder produces structural proposals, and the refine module generates final conformations conditioned on those proposals. The latent width is 32.
+OriDynamics generates all-atom conformational ensembles with a structural autoencoder, a latent flow module, and a coordinate refine module. The flow module samples token-level latents, the decoder produces structural proposals, and the refine module generates final conformations conditioned on those proposals. The latent width is 32.
 
 | Checkpoint | Role |
 | :--- | :--- |

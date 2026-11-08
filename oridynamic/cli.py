@@ -8,7 +8,7 @@ from oridynamic import __version__
 
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
-    p = argparse.ArgumentParser(prog="oridynamic", description="OriDynamic: all-atom ensembles for monomers, protein-ligand complexes, and protein-protein assemblies")
+    p = argparse.ArgumentParser(prog="oridynamic", description="OriDynamics: Towards a World Model for Biomolecular Dynamics")
     p.add_argument("--version", action="version", version=__version__)
     p.add_argument("command", nargs="?", choices=("sample", "msa", "doctor"),
                    help="sample: generate ensembles; msa: local MSA search; doctor: read-only environment/resource checks")

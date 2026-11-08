@@ -1,8 +1,8 @@
 # Installation
 
-OriDynamic supports editable installation with `python -m pip install -e .` and installation from a built wheel. The public commands are `oridynamic sample`, `oridynamic msa`, and `oridynamic doctor`. See the [README](README.md) for a quick start.
+OriDynamics supports editable installation with `python -m pip install -e .` and installation from a built wheel. The public commands are `oridynamic sample`, `oridynamic msa`, and `oridynamic doctor`. See the [README](README.md) for a quick start.
 
-Use the Python 3.11 / CUDA 12.6 environment below in a dedicated environment. This package is not currently distributed through PyPI. The two OriDynamic weights are hosted on [Hugging Face](https://huggingface.co/LG-FrontierAI/OriDynamic); the Protenix base and CCD resources are obtained from the official Protenix distribution. Set `ORIDYNAMIC_PATHS` and `ORIDYNAMIC_ASSETS`, or pass `--paths` and `--assets-root` explicitly.
+Use the Python 3.11 / CUDA 12.6 environment below in a dedicated environment. This package is not currently distributed through PyPI. The two OriDynamics weights are hosted on [Hugging Face](https://huggingface.co/LG-FrontierAI/oridynamics); the Protenix base and CCD resources are obtained from the official Protenix distribution. Set `ORIDYNAMIC_PATHS` and `ORIDYNAMIC_ASSETS`, or pass `--paths` and `--assets-root` explicitly.
 
 Inference requires this repository, its matching inference checkpoints, CCD resources, and the appropriate MSA inputs or search resources. FASTA entries describe independent proteins; use the [complex JSON format](docs/complex_inputs.md) for protein–ligand and protein–protein systems.
 
@@ -29,8 +29,8 @@ The inference image does not include MSA databases or search tools. Generate MSA
 The tested runtime uses Linux x86_64, Python 3.11, and PyTorch 2.7.1 with CUDA 12.6. For a fresh checkout and environment:
 
 ```bash
-git clone https://github.com/LG-FrontierAI/OriDynamic.git
-cd OriDynamic
+git clone https://github.com/LG-FrontierAI/oridynamics.git
+cd oridynamics
 
 conda create -n oridynamic python=3.11 -y
 conda activate oridynamic
@@ -52,7 +52,7 @@ The default Torch backend does not require compiling fused LayerNorm. The option
 
 ## 2. Model weights and CCD
 
-Download the OriDynamic autoencoder and joint weights from [Hugging Face](https://huggingface.co/LG-FrontierAI/OriDynamic), and **Protenix base v1.0.0** plus both CCD files from the official [Protenix](https://github.com/bytedance/Protenix) distribution. The commands below download all five required files.
+Download the OriDynamics autoencoder and joint weights from [Hugging Face](https://huggingface.co/LG-FrontierAI/oridynamics), and **Protenix base v1.0.0** plus both CCD files from the official [Protenix](https://github.com/bytedance/Protenix) distribution. The commands below download all five required files.
 
 <a id="ccd"></a>
 
@@ -65,7 +65,7 @@ Both CCD (Chemical Component Dictionary) files are required for protein monomers
 | `components.cif` | Atom and bond definitions for residues and ligands. |
 | `components.cif.rdkit_mol.pkl` | Precomputed RDKit molecules used to obtain chemical reference features. |
 
-Save both CCD files in `assets/common/`. Installing the Python package or downloading the OriDynamic weights does not install these files; the inference runtime does not fetch them automatically.
+Save both CCD files in `assets/common/`. Installing the Python package or downloading the OriDynamics weights does not install these files; the inference runtime does not fetch them automatically.
 
 ### Download all resources
 
@@ -77,8 +77,8 @@ python -m pip install -c requirements-inference.txt \
   "huggingface_hub==2.4.0" "socksio==1.0.0"
 python -m pip check
 
-# OriDynamic weights
-hf download LG-FrontierAI/OriDynamic \
+# OriDynamics weights
+hf download LG-FrontierAI/oridynamics \
   ae.ckpt oridynamic.ckpt \
   --local-dir weights
 
@@ -99,7 +99,7 @@ curl -fL --retry 3 \
   -o assets/common/components.cif.rdkit_mol.pkl
 ```
 
-Use the official Protenix v1.0.0 file with the SHA-256 shown above and the matching OriDynamic checkpoints. The loader checks checkpoint compatibility before sampling. The RDKit companion is a pickle resource; use the official source above.
+Use the official Protenix v1.0.0 file with the SHA-256 shown above and the matching OriDynamics checkpoints. The loader checks checkpoint compatibility before sampling. The RDKit companion is a pickle resource; use the official source above.
 
 ### Resource paths
 
@@ -140,7 +140,7 @@ Run the [bundled examples](examples/README.md) to generate your first ensembles.
 
 ## 4. Local MSA search with ColabFold/MMseqs2
 
-Install the search tools and databases separately. OriDynamic calls the public ColabFold/MMseqs2 tools; it does not provide a persistent search service. Existing alignments can be supplied directly with `--msa-a3m`.
+Install the search tools and databases separately. OriDynamics calls the public ColabFold/MMseqs2 tools; it does not provide a persistent search service. Existing alignments can be supplied directly with `--msa-a3m`.
 
 A separate search environment helps avoid dependency conflicts. The host can launch a search container:
 
@@ -189,4 +189,4 @@ The [batch guide](docs/batch_inference.md#outputs-and-timing) defines search and
 
 ## License
 
-OriDynamic is released under [Apache-2.0](LICENSE). See [NOTICE](NOTICE), [Protenix license](licenses/Protenix.txt), and [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES) for attribution and third-party terms.
+OriDynamics is released under [Apache-2.0](LICENSE). See [NOTICE](NOTICE), [Protenix license](licenses/Protenix.txt), and [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES) for attribution and third-party terms.

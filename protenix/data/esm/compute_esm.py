@@ -30,7 +30,7 @@ def load_esm_model(model_name, local_esm_dir):
     if os.path.exists(local_model_path):
         print('Try to load ESM language model from ', local_model_path)
     if 'ism' in model_name and (not os.path.exists(local_model_path)):
-        raise RuntimeError(f'ESM-ISM weights are not distributed with this release: {local_model_path}. The supported OriDynamic inference profile has ESM disabled.')
+        raise RuntimeError(f'ESM-ISM weights are not distributed with this release: {local_model_path}. The supported OriDynamics inference profile has ESM disabled.')
     if model_name.startswith('esm2'):
         model, alphabet = _load_esm2_model(local_model_path)
     model.eval()

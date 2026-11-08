@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "oridynamic-inference"
 version = "0.1.0"
-description = "All-atom biomolecular ensemble generation with OriDynamic"
+description = "OriDynamics: Towards a World Model for Biomolecular Dynamics"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE", "licenses/Protenix.txt", "NOTICE", "THIRD_PARTY_NOTICES"]

@@ -117,7 +117,7 @@
       : all ? 'Solid cartoons show representatives; lighter traces show seven additional samples. '
       : 'Playback cycles through unordered ensemble samples. ')
       + 'Both views share the same alignment and scale.'
-      + (data.id === 'A00C2' ? ' The partner chain is purple in OriDynamic and pale pink in GT.' : '');
+      + (data.id === 'A00C2' ? ' The partner chain is purple in OriDynamics and pale pink in GT.' : '');
   }
   function playSamples(on) {
     clearTimeout(playTimer);playTimer=null;
