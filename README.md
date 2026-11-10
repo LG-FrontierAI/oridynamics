@@ -14,8 +14,7 @@
 
 [![Release: 0.1.0](docs/images/release.svg)](pyproject.toml)
 
-<!-- Replace #technical-report with the technical report URL when available. -->
-[🌐 Homepage](https://lg-frontierai.github.io/homepage/oridynamics/) &nbsp; · &nbsp; [📄 Technical report (coming soon)](#technical-report) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/LG-FrontierAI/oridynamics) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
+[🌐 Homepage](https://lg-frontierai.github.io/homepage/oridynamics/) &nbsp; · &nbsp; [📄 Technical report](https://arxiv.org/abs/2611.11958) &nbsp; · &nbsp; [🤗 Weights](https://huggingface.co/LG-FrontierAI/oridynamics) &nbsp; · &nbsp; [🚀 Quick start](#quick-start) &nbsp; · &nbsp; [📖 Documentation](#documentation)
 
 </div>
 
